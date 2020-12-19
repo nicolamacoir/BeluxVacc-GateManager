@@ -1,0 +1,21 @@
+{
+  "name": "belux_gate_assignment_tool",
+  "version": "1.0.0",
+  "description": "Gate assignment API for belux vacc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "Nicola Macoir",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "nedb": "^1.8.0",
+    "node-fetch": "^2.6.1",
+    "underscore": "^1.12.0"
+  }
+}
