@@ -211,6 +211,7 @@ async function process_clients(clients){
             long = client["longitude"],
             altitude = client["altitude"],
             status = "UNKNOWN",
+            arr_distance = '',
             AC_code = client["planned_aircraft"].split("/")[0];
         
         if (AC_code.length==1){
@@ -224,7 +225,7 @@ async function process_clients(clients){
             var closestGate = f.get_gate_for_position(lat, long);
             // CHECK gate reservation OK
             if (closestGate == null){
-                status = "TAXING"
+                status = "taxing"
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "spawned"){
                     var gate = await syncFindOne({"assigned_to": callsign})
                     if(gate!=null){
@@ -248,11 +249,11 @@ async function process_clients(clients){
                         load_active_clients();
                     }
                 }
-                status = "<b>AT GATE</b>"
+                status = "at_gate"
             }
         }else{
             if(client["planned_depairport"] == "EBBR"){
-                status = "DEPARTED"
+                status = "departed"
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "spawned"){
                     var gate = await syncFindOne({"assigned_to": callsign})
                     if(gate!=null){
@@ -270,15 +271,16 @@ async function process_clients(clients){
                 if (distance < 150 && monitored_clients[callsign] != "MAN_ARR"){
                     request_gate(callsign, client["planned_depairport"], AC_code, null)
                 }
-                status = "ARRIVING (" + parseInt(distance) +" NM)"
+                status = "arriving"
+                arr_distance = parseInt(distance)
             }
         }
         var result = await syncFindOne({"assigned_to": callsign})
-        var gate = (result== null ? "": ("<b>" + result["gate"] + "</b>")) 
+        var gate = (result== null ? "": (result["gate"])) 
         if(client["planned_depairport"] == "EBBR"){
-            output_clients.push({"type": "D", "callsign" : callsign, "airport": client["planned_destairport"], "AC": AC_code, "status": status, "reservation": gate})
+            output_clients.push({"type": "D", "callsign" : callsign, "airport": client["planned_destairport"], "ac": AC_code, "status": status, "distance": arr_distance, "reservation": gate})
         }else{
-            output_clients.push({"type": "A", "callsign" :callsign, "airport": client["planned_depairport"], "AC": AC_code, "status": status, "reservation": gate})
+            output_clients.push({"type": "A", "callsign" :callsign, "airport": client["planned_depairport"], "ac": AC_code, "status": status,  "distance": arr_distance, "reservation": gate})
         }
     }
     active_clients = output_clients
