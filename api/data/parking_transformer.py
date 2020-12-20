@@ -9,7 +9,7 @@ with open('gates.json', 'w') as outfile:
             continue
         #outfile.write("\t\"{}\":{{\n".format(row[1]))
         outfile.write("\t{\n")
-        outfile.write("\t\t\"gate\": \"{}\",\n".format(row[1]))
+        outfile.write("\t\t\"gate\": \"{}\",\n".format(str(row[1]).rstrip()))
         outfile.write("\t\t\"apron\": \"{}\",\n".format(row[0]))
         outfile.write("\t\t\"latitude\": {},\n".format(row[9]))
         outfile.write("\t\t\"longitude\": {},\n".format(row[13]))

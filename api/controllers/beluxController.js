@@ -5,6 +5,15 @@ var db = new Datastore();
 var f = require('./helpFunctions.js')
 var json = require('../data/gates.json');
 
+// db.insert(	{
+//     "gate": "310R",
+//     "apron": "apron-test",
+//     "latitude": 52.901488888888885,
+//     "longitude": 6.476963888888889,
+//     "occupied": true,
+//     "assigned_to": "BER64T"
+// }, function(err, res){ console.log("inserted dummy gate/callsign")});
+
 
 db.insert(json, function(err, result){
     if(err){
@@ -89,7 +98,11 @@ function request_gate(callsign, origin, ac, res){
                 db.findOne({"gate": temp_gate["gate"]}, function(err, gate) {
                     gate.occupied = true;
                     gate.assigned_to = callsign;
-                    monitored_clients[callsign] = "ATC"
+                    if(res == null){
+                        monitored_clients[callsign] = "AUTO_ARR"
+                    }else{
+                        monitored_clients[callsign] = "MANUAL"
+                    }
                     db.update({"gate": temp_gate["gate"]}, gate, function(err, ok){
                         if(res)
                             res.json(gate);
@@ -119,10 +132,14 @@ exports.toggle_reservation = function(req, res){
         gate.occupied = !gate.occupied;
         if(gate.occupied == true){
             gate.assigned_to = callsign;
-            monitored_clients[callsign] = "ATC"
+            monitored_clients[callsign] = "MANUAL"
         }else{
             gate.assigned_to = "none";
-            delete monitored_clients[callsign]
+            if(monitored_clients[callsign] != "AUTO_ARR"){
+                delete monitored_clients[callsign]
+            }else{
+                monitored_clients[callsign] = "MAN_ARR"
+            }
         }
         db.update({"gate": requested_gateid}, gate, function(err, ok){
             res.json({"status": "ok"});
@@ -227,7 +244,7 @@ async function process_clients(clients){
                         gate.occupied = true;
                         gate.assigned_to = callsign;
                         await syncUpdate({"gate": closestGate["gate"]}, gate)
-                        monitored_clients[callsign] = "spawned"
+                        monitored_clients[callsign] = "AUTO-DEP"
                         load_active_clients();
                     }
                 }
@@ -250,7 +267,7 @@ async function process_clients(clients){
                 
                 var location_client = {"latitude": lat, "longitude": long} 
                 var distance = f.worldDistance(location_client, location_brussels)
-                if (distance < 150){
+                if (distance < 150 && monitored_clients[callsign] != "MAN_ARR"){
                     request_gate(callsign, client["planned_depairport"], AC_code, null)
                 }
                 status = "ARRIVING (" + parseInt(distance) +" NM)"
