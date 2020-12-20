@@ -6,7 +6,6 @@ stages:
 
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_PIPELINE_ID
-  DOCKER_TLS_CERTDIR: "/certs"
   SSH_PORT: 7777
 
 docker-build:
@@ -17,48 +16,48 @@ docker-build:
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
 
-# remove-old-docker-container:
-#   stage: clean-old-environment
-#   script:
-#     - apt-get update -qq
-#     - 'which ssh-agent || ( apt-get install -qq openssh-client )'
-#     - eval $(ssh-agent -s)
-#     - ssh-add <(echo "$CD_SERVER_PRIVATE_KEY" | base64 -d)
-#     - mkdir -p ~/.ssh
-#     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-#     - ssh -p $SSH_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab@server.beluxvacc.org "sudo docker rm -f ${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}"
-#   allow_failure: true
-#   only:
-#     refs:
-#       - master
-#       - develop
+remove-old-docker-container:
+  stage: clean-old-environment
+  script:
+    - apt-get update -qq
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$CD_SERVER_PRIVATE_KEY" | base64 -d)
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh -p $SSH_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab@server.beluxvacc.org "sudo docker rm -f ${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}"
+  allow_failure: true
+  only:
+    refs:
+      - master
+      - develop
 
-# deploy-new-docker-container:
-#   stage: deploy-new-environment
-#   script:
-#     - apt-get update -qq
-#     - 'which ssh-agent || ( apt-get install -qq openssh-client )'
-#     - eval $(ssh-agent -s)
-#     - ssh-add <(echo "$CD_SERVER_PRIVATE_KEY" | base64 -d)
-#     - mkdir -p ~/.ssh
-#     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-#     - ssh -p $SSH_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab@server.beluxvacc.org "sudo docker run -d --name=${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG} -e TZ='UTC' --net=belux-internal -v /beluxvacc/configs/${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}/.env:/usr/src/app/.env --restart=unless-stopped ${IMAGE_TAG}"
-#   only:
-#     refs:
-#       - master
-#       - develop
+deploy-new-docker-container:
+  stage: deploy-new-environment
+  script:
+    - apt-get update -qq
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$CD_SERVER_PRIVATE_KEY" | base64 -d)
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh -p $SSH_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab@server.beluxvacc.org "sudo docker run -d --name=${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG} -e TZ='UTC' --net=belux-internal --restart=unless-stopped ${IMAGE_TAG}"
+  only:
+    refs:
+      - master
+      - develop
 
-# validate-new-docker-container:
-#   stage: validate-new-environment
-#   script:
-#     - apt-get update -qq
-#     - 'which ssh-agent || ( apt-get install -qq openssh-client )'
-#     - eval $(ssh-agent -s)
-#     - ssh-add <(echo "$CD_SERVER_PRIVATE_KEY" | base64 -d)
-#     - mkdir -p ~/.ssh
-#     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-#     - ssh -p $SSH_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab@server.beluxvacc.org "sudo docker inspect ${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG} | jq -r '.[].State.Status' | grep running"
-#   only:
-#     refs:
-#       - master
-#       - develop
+validate-new-docker-container:
+  stage: validate-new-environment
+  script:
+    - apt-get update -qq
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$CD_SERVER_PRIVATE_KEY" | base64 -d)
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh -p $SSH_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab@server.beluxvacc.org "sudo docker inspect ${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG} | jq -r '.[].State.Status' | grep running"
+  only:
+    refs:
+      - master
+      - develop
