@@ -226,7 +226,7 @@ async function process_clients(clients){
             // CHECK gate reservation OK
             if (closestGate == null){
                 status = "taxing"
-                if ( callsign in monitored_clients && monitored_clients[callsign] == "spawned"){
+                if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
                     var gate = await syncFindOne({"assigned_to": callsign})
                     if(gate!=null){
                         gate.occupied = false;
@@ -254,7 +254,7 @@ async function process_clients(clients){
         }else{
             if(client["planned_depairport"] == "EBBR"){
                 status = "departed"
-                if ( callsign in monitored_clients && monitored_clients[callsign] == "spawned"){
+                if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
                     var gate = await syncFindOne({"assigned_to": callsign})
                     if(gate!=null){
                         gate.occupied = false;
