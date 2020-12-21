@@ -153,11 +153,7 @@ exports.toggle_reservation = function(req, res){
             monitored_clients[callsign] = "MANUAL"
         }else{
             gate.assigned_to = "none";
-            if(monitored_clients[callsign] != "AUTO_ARR"){
-                delete monitored_clients[callsign]
-            }else{
-                monitored_clients[callsign] = "MAN_ARR"
-            }
+            monitored_clients[callsign] = "MANUAL"
         }
         db.update({"gate": requested_gateid}, gate, function(err, ok){
             res.json({"status": "ok"});
@@ -286,7 +282,7 @@ async function process_clients(clients){
                 
                 var location_client = {"latitude": lat, "longitude": long} 
                 var distance = f.worldDistance(location_client, location_brussels)
-                if (distance < 150 && monitored_clients[callsign] != "MAN_ARR"){
+                if (distance < 150 && monitored_clients[callsign] != "MANUAL"){
                     request_gate(callsign, client["planned_depairport"], AC_code, null)
                 }
                 status = "arriving"
