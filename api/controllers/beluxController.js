@@ -28,148 +28,108 @@ let monitored_clients = {}
 let last_updated = Date.now()
 
 const location_brussels = {"latitude": 50.902, "longitude": 4.485}
-/* API FUNCTIONS */
 
-/* /GET/all_gates */
-exports.list_all_gates = function(req, res) {
-    db.find({}, {"_id": 0, "__v":0}).sort({occupied : -1, apron:1 }).exec(function(err, task) {
-        if (err)
-            res.send(err);
-        res.json(task);
+async function get_all_gates(){
+    var gates = await new Promise((resolve, reject) => {
+        db.find({}, {"_id": 0, "__v":0}).sort({occupied : -1, apron:1 }).exec((err, count) => {
+            if (err) reject(err);
+            resolve(count);
+        });
     });
-};
+    return gates
+}
 
-/* /POST/all_gates */
-exports.list_all_valid_gates = function(req, res) {
-    callsign = req.body.callsign;
-    origin = req.body.origin;
-    ac = req.body.aircraft;
-
+async function get_all_possible_gates_for(callsign, origin, ac){
     apron = f.get_valid_aprons(callsign, origin, ac);
-    db.find({"apron": { $in: apron}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec(function(err, gates){
-        if(err)
-            res.send(err)
-        res.json(gates)
+    var gates = await new Promise((resolve, reject) => {
+        db.find({"apron": { $in: apron}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
+            if (err) reject(err);
+            resolve(result);
+        });
     });
-};
-
-/* /GET/get_gate/:gateid*/
-exports.get_gate_for_id = function(req, res){
-    gateid = req.params["gateid"];
-
-    db.find({"gate": gateid}, {"_id": 0, "__v":0}, function(err, gates){
-        if(err)
-            res.send(err)
-        res.json(gates);
-    });
-};
-
-exports.get_gate_for_callsign = function(req, res){
-    callsign = req.body.callsign;
-    db.find({"assigned_to" : callsign},{"_id": 0, "__v":0, "apron":0, "latitude":0, "longitude":0, "occupied":0}, function(err, gate){
-        if(err)
-            res.send(err)
-        res.json(gate)
-    });
+    return gates
 }
 
-function request_gate(callsign, origin, ac, res){
-    db.find({"assigned_to" : callsign},{"_id": 0, "__v":0}, function(err, a_gates){
-        if(err && res)
-            res.send(err)
-        if (a_gates.length > 0){
-            //Has already a reservation
-            if(res)
-                res.json(a_gates)
-        }else{
-            apron = f.get_valid_aprons(callsign, origin, ac);
-            db.find({"apron": { $in: apron}, "occupied": false}, {"_id": 0, "__v":0}, function(err, gates){
-                if(err && res)
-                    res.send(err)
-                temp_gate = gates[Math.floor(Math.random() * gates.length)];
-                db.findOne({"gate": temp_gate["gate"]}, function(err, gate) {
-                    gate.occupied = true;
-                    gate.assigned_to = callsign;
-                    if(res == null){
-                        monitored_clients[callsign] = "AUTO_ARR"
-                    }else{
-                        monitored_clients[callsign] = "MANUAL"
-                    }
-                    db.update({"gate": temp_gate["gate"]}, gate, function(err, ok){
-                        if(res)
-                            res.json(gate);
-                    });
-                });
+async function get_gate_for_gateid(gate_id){
+    var gate = await new Promise((resolve, reject) => {
+        db.findOne({"gate": gate_id}, {"_id": 0, "__v":0}, (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+        });
+    });
+    return gate
+}
+
+async function get_gate_for_callsign(callsign){
+    var gate = await new Promise((resolve, reject) => {
+        db.findOne({"assigned_to" : callsign},{"_id": 0, "__v":0, "apron":0, "latitude":0, "longitude":0, "occupied":0}, (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+        });
+    });
+    return gate
+}
+
+async function set_gate_to_callsign(gate_id, callsign){
+    /* Check if already has a reservation, if yes, return error*/
+    var curr_reservation = await get_gate_for_callsign(callsign);
+    if (curr_reservation != null){ 
+        return "ERR: occupied"
+    }
+    
+    /* Get gate */
+    var gate = await new Promise((resolve, reject) => {
+        db.findOne({"gate": gate_id}, (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+        });
+    });
+
+    /* Gate exists, if no return error */
+    if (gate != null){
+        /* Update gate */
+        gate.occupied = true;
+        gate.assigned_to = callsign;
+        var result = await new Promise((resolve, reject) => {
+            db.update({"gate": gate_id}, gate, function(err, result){
+                if (err) reject(err);
+                resolve(gate);
             });
-        }
-    });
-}
-
-/* /POST/request_gate */
-exports.request_gate = function(req, res){
-    callsign = req.body.callsign;
-    origin = req.body.origin;
-    ac = req.body.aircraft;
-    request_gate(callsign, origin, ac, res);
-};
-
-exports.change_gate = function(req, res){
-    callsign = req.body.callsign;
-    requested_gateid = req.body.gate_id;
-
-    db.findOne({"assigned_to" : callsign},{"_id": 0, "__v":0}, function(err, gate){
-        if(err)
-            res.send(err)
-        if(gate != null){
-            gate.occupied = false;
-            gate.assigned_to = "none";
-            db.update({"gate": requested_gateid}, gate, function(err, ok){});
-        }
-    });
-    db.findOne({"gate": requested_gateid}, function(err, gate) {
-        if(err)
-            res.send(err)
-        if(gate.occupied == false){
-            gate.occupied = true;
-            gate.assigned_to = callsign;
-            monitored_clients[callsign] = "MANUAL"
-        }
-        db.update({"gate": requested_gateid}, gate, function(err, ok){
-            res.json(gate);
         });
-        load_active_clients();
-    });
+        return result
+    }else{
+        return "ERR: gate does not exist";
+    }
 }
 
-exports.toggle_reservation = function(req, res){
-    callsign = req.body.callsign;
-    var requested_gateid = req.params["gateid"];
-    db.findOne({"gate": requested_gateid}, function(err, gate) {
-        if(err)
-            res.send(err)
-        gate.occupied = !gate.occupied;
-        if(gate.occupied == true){
-            gate.assigned_to = callsign;
-            monitored_clients[callsign] = "MANUAL"
-        }else{
-            gate.assigned_to = "none";
-            monitored_clients[callsign] = "MANUAL"
-        }
-        db.update({"gate": requested_gateid}, gate, function(err, ok){
-            res.json({"status": "ok"});
+async function clear_gate(gate_id){
+    var gate = await new Promise((resolve, reject) => {
+        db.findOne({"gate": gate_id}, (err, result) => {
+            if (err) reject(err);
+            resolve(result);
         });
-        load_active_clients();
     });
+    gate.occupied = false;
+    gate.assigned_to = "none";
+    var result = await new Promise((resolve, reject) => {
+        db.update({"gate": gate_id}, gate, function(err, result){
+            if (err) reject(err);
+            resolve("OK");
+        });
+    });
+    return result;
 }
 
-exports.get_active_clients = function(req, res){
-    res.json({"updated": last_updated, "clients": active_clients});
-}
 
-
-exports.force_reload_clients= async function(req, res){
-    await load_active_clients()
-    res.json({"status": "OK"})
+async function request_gate_for(callsign, origin, ac){
+    var gates = await get_all_possible_gates_for(callsign, origin, ac);
+    var temp_gate = gates[Math.floor(Math.random() * gates.length)];
+    var result = await set_gate_to_callsign(temp_gate["gate"], callsign)
+    while(result == "ERR: occupied"){
+        var temp_gate = gates[Math.floor(Math.random() * gates.length)];
+        var result = await set_gate_to_callsign(temp_gate["gate"], callsign)
+    }
+    return result
 }
 
 async function load_active_clients(){
@@ -199,24 +159,6 @@ async function load_active_clients(){
     }
 }
 
-async function syncFindOne(query){
-    return await new Promise((resolve, reject) => {
-        db.findOne(query, (err, count) => {
-            if (err) reject(err);
-            resolve(count);
-        });
-    });
-} 
-
-async function syncUpdate(query, object){
-    return await new Promise((resolve, reject) => {
-        db.update(query, object, (err, count) => {
-            if (err) reject(err);
-            resolve(count);
-        });
-    });
-}
-
 async function process_clients(clients){
     var i, output_clients=[];
     for (const [key, client] of Object.entries(clients)) {
@@ -241,24 +183,20 @@ async function process_clients(clients){
             if (closestGate == null){
                 status = "taxing"
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
-                    var gate = await syncFindOne({"assigned_to": callsign})
+                    var gate = await get_gate_for_callsign(callsign);
                     if(gate!=null){
-                        gate.occupied = false;
-                        gate.assigned_to = "none";
-                        await syncUpdate({"gate": gate["gate"]}, gate)
+                        var result = await clear_gate(gate["gate"]); 
                         delete monitored_clients[callsign]
                         console.log("deleted " + callsign)
                     }
                 }
             }else{
                 // AC is at gate
-                var result = await syncFindOne({"assigned_to": callsign})
-                if (result == null){
-                    let gate = await syncFindOne({"gate": closestGate["gate"], "occupied":false})
-                    if(gate != null){
-                        gate.occupied = true;
-                        gate.assigned_to = callsign;
-                        await syncUpdate({"gate": closestGate["gate"]}, gate)
+                var cur_gate = await get_gate_for_callsign(callsign);
+                if (cur_gate == null){
+                    let gate = await get_gate_for_gateid(closestGate["gate"]);
+                    if(gate.occupied == false){
+                        var result = set_gate_to_callsign(gate["gate"], callsign); 
                         monitored_clients[callsign] = "AUTO-DEP"
                         load_active_clients();
                     }
@@ -269,27 +207,28 @@ async function process_clients(clients){
             if(client["planned_depairport"] == "EBBR"){
                 status = "departed"
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
-                    var gate = await syncFindOne({"assigned_to": callsign})
+                    var gate = await get_gate_for_callsign(callsign)
                     if(gate!=null){
-                        gate.occupied = false;
-                        gate.assigned_to = "none";
-                        await syncUpdate({"gate": gate["gate"]}, gate)
+                        var result = await clear_gate(gate["gate"]); 
                         delete monitored_clients[callsign]
                         console.log("deleted " + callsign)
                     }
                 }
             }else{
-                
                 var location_client = {"latitude": lat, "longitude": long} 
                 var distance = f.worldDistance(location_client, location_brussels)
                 if (distance < 150 && monitored_clients[callsign] != "MANUAL"){
-                    request_gate(callsign, client["planned_depairport"], AC_code, null)
+                    var cur_gate = await get_gate_for_callsign(callsign);
+                    if (cur_gate == null){
+                        var result = await request_gate_for(callsign, client["planned_depairport"], AC_code)
+                        monitored_clients[callsign] = "AUTO_ARR"
+                    }
                 }
                 status = "arriving"
                 arr_distance = parseInt(distance)
             }
         }
-        var result = await syncFindOne({"assigned_to": callsign})
+        var result = await get_gate_for_callsign(callsign);
         var gate = (result== null ? "": (result["gate"])) 
         if(client["planned_depairport"] == "EBBR"){
             output_clients.push({"type": "D", "callsign" : callsign, "airport": client["planned_destairport"], "ac": AC_code, "status": status, "distance": arr_distance, "reservation": gate})
@@ -300,11 +239,9 @@ async function process_clients(clients){
     active_clients = output_clients
     return {"status": "ok"}
 }
-load_active_clients()
-setInterval(load_active_clients, 90*1000);
 
 function bookkeep_clients(){
-    Object.keys(monitored_clients).forEach(function(key){
+    Object.keys(monitored_clients).forEach(async function(key){
         var i, found=false;
         for (i=0;i<active_clients.length;i++){
             if (active_clients[i]["callsign"] == key)
@@ -312,19 +249,117 @@ function bookkeep_clients(){
         }
         if (!found){
             console.log("cleaning up " + key)
-            db.findOne({"assigned_to": key}, function(err, gate) {
-                if(err)
-                    res.send(err)
-                if(gate!=null){
-                    gate.occupied = false;
-                    gate.assigned_to = "none";
-                    db.update({"gate": gate["gate"]}, gate, function(err, ok){});
-                }
-                delete monitored_clients[key]
-            });
+            var gate = await get_gate_for_callsign(key);
+            var result = await clear_gate(gate["gate"]);
+            delete monitored_clients[key]
         }
     });
 }
+
+load_active_clients()
+setInterval(load_active_clients, 90*1000);
 setInterval(bookkeep_clients, 120*1000);
 
+/* API FUNCTIONS */
 
+/* /GET/all_gates */
+exports.list_all_gates = async function(req, res) {
+    var gates = await get_all_gates()
+    res.json(gates);
+};
+
+/* /POST/all_gates */
+exports.list_all_valid_gates = async function(req, res) {
+    callsign = req.body.callsign;
+    origin = req.body.origin;
+    ac = req.body.aircraft;
+
+    var gates =  await get_all_possible_gates_for(callsign, origin, ac)
+    res.json(gates)
+};
+
+/* /GET/get_gate/:gateid*/
+exports.get_gate_for_id = async function(req, res){
+    gate_id = req.params["gateid"];
+
+    var gate = await get_gate_for_gateid(gate_id)
+    res.json(gate);
+};
+
+/* /POST/get_gate*/
+exports.get_gate_for_callsign = async function(req, res){
+    callsign = req.body.callsign;
+    
+    var gate = await get_gate_for_callsign(callsign)
+    res.json(gate)
+}
+
+
+/* /POST/request_gate */
+exports.request_gate = async function(req, res){
+    callsign = req.body.callsign;
+    origin = req.body.origin;
+    ac = req.body.aircraft;
+
+    var result = await request_gate_for(callsign, origin, ac);
+    res.json(result);
+    monitored_clients[callsign] = "MANUAL"
+};
+
+/* /POST/change_gate */
+exports.change_gate = async function(req, res){
+    callsign = req.body.callsign;
+    requested_gateid = req.body.gate_id;
+
+    var old_gate = await get_gate_for_callsign(callsign);
+    var result = await clear_gate(old_gate["gate"]);
+    var new_gate = await set_gate_to_callsign(requested_gateid, callsign);
+    if(new_gate == "ERR: occupied"){
+        res.status(500).send(
+        {
+            error: {
+              status: 500,
+              message: "Gate already in use.",
+            }
+        });
+    }else if (new_gate == "ERR: gate does not exist"){
+        res.status(500).send(
+            {
+                error: {
+                  status: 500,
+                  message: "Gate does not exist.",
+                }
+            });
+    }else{
+        res.json(new_gate);
+        monitored_clients[callsign] = "MANUAL"
+        load_active_clients();
+    }
+}
+
+/* /POST/toggle_reservation/:gateid */
+exports.toggle_reservation = async function(req, res){
+    callsign = req.body.callsign;
+    var requested_gateid = req.params["gateid"];
+
+    var gate = await get_gate_for_gateid(requested_gateid);
+    if (gate.occupied == true){
+        var result = await clear_gate(requested_gateid);
+    }else{
+        var result = await set_gate_to_callsign(requested_gateid, callsign);
+    }
+    monitored_clients[callsign] = "MANUAL";
+    res.json(result);
+    load_active_clients();
+}
+
+/* /GET/get_clients */
+exports.get_active_clients = function(req, res){
+    res.json({"updated": last_updated, "clients": active_clients});
+}
+
+/* /GET/force_get_clients */
+exports.force_reload_clients= async function(req, res){
+    await load_active_clients()
+    res.json({"status": "OK"})
+}
