@@ -46,19 +46,11 @@ exports.list_all_valid_gates = function(req, res) {
     ac = req.body.aircraft;
 
     apron = f.get_valid_aprons(callsign, origin, ac);
-    db.find({"assigned_to" : callsign}, function(err, a_gates){
+    db.find({"apron": { $in: apron}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec(function(err, gates){
         if(err)
             res.send(err)
-        if (a_gates.length > 0){
-            res.json(a_gates)
-        }else{
-            db.find({"apron": { $in: apron}}, {"_id": 0, "__v":0}).sort({occupied : -1, apron: 1 }).exec(function(err, gates){
-                if(err)
-                    res.send(err)
-                res.json(gates)
-            });
-        }
-    }) 
+        res.json(gates)
+    });
 };
 
 /* /GET/get_gate/:gateid*/
@@ -121,7 +113,33 @@ exports.request_gate = function(req, res){
     request_gate(callsign, origin, ac, res);
 };
 
-exports.change_gate = function(req, res){}
+exports.change_gate = function(req, res){
+    callsign = req.body.callsign;
+    requested_gateid = req.body.gate_id;
+
+    db.findOne({"assigned_to" : callsign},{"_id": 0, "__v":0}, function(err, gate){
+        if(err)
+            res.send(err)
+        if(gate != null){
+            gate.occupied = false;
+            gate.assigned_to = "none";
+            db.update({"gate": requested_gateid}, gate, function(err, ok){});
+        }
+    });
+    db.findOne({"gate": requested_gateid}, function(err, gate) {
+        if(err)
+            res.send(err)
+        if(gate.occupied == false){
+            gate.occupied = true;
+            gate.assigned_to = callsign;
+            monitored_clients[callsign] = "MANUAL"
+        }
+        db.update({"gate": requested_gateid}, gate, function(err, ok){
+            res.json(gate);
+        });
+        load_active_clients();
+    });
+}
 
 exports.toggle_reservation = function(req, res){
     callsign = req.body.callsign;

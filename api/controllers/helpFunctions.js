@@ -2,7 +2,7 @@ var fs = require('fs');
 var gates_json = JSON.parse(fs.readFileSync('api/data/gates.json', 'utf8'));
 
 var shengen_prefixes = ["EL", "EH", "EB", "ED", "LP", "LO", "LK", "EK", "EE", "EF", "LG", "LH", "BI", "LI", "EV", "EY", "LM", "EN", "EP", "LP", "LZ", "LJ", "LE", "ES", "LS"];
-var cargo_icaos = ["FDX", "QTR", "UPS", "UAE", "CPA", "KAL", "GEC", "CLX", "DHL", "CSN", "BCS"];
+var cargo_icaos = ["FDX", "QTR", "UPS", "UAE", "CPA", "KAL", "GEC", "CLX", "DHL", "CSN", "BCS", "NPT"];
 var low_costs_icaos = ["RYR", "EJU", "WZZ"];
 var VFR_AC = ["B190", "C750", "C172", "CRJ", "M20P"]
 
