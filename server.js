@@ -13,8 +13,6 @@ app.use(cors())
 var routes = require('./api/routes/beluxRoutes'); //importing route
 routes(app); //register the route
 
-// app.use(express.static('public'))
-
 app.listen(port);
 
 console.log('belux-gate-manager-api succesfully started on: ' + port);
