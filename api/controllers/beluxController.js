@@ -246,17 +246,18 @@ async function process_clients(clients){
             }else{
                 var location_client = {"latitude": lat, "longitude": long} 
                 arr_distance = parseInt(f.worldDistance(location_client, location_brussels))
-                if(parseInt(ground_speed) > 50){
-                    if (arr_distance < 150){
-                        var cur_gate = await get_gate_for_callsign(callsign);
-                        if (cur_gate == null){
-                            var result = await request_gate_for(callsign, client["planned_depairport"], AC_code)
-                            monitored_clients[callsign] = "AUTO_ARR"
-                        }
+                if(parseInt(ground_speed) < 50)
+                    /* not yet departed from origin*/
+                    continue
+                if (arr_distance < 150){
+                    var cur_gate = await get_gate_for_callsign(callsign);
+                    if (cur_gate == null){
+                        var result = await request_gate_for(callsign, client["planned_depairport"], AC_code)
+                        monitored_clients[callsign] = "AUTO_ARR"
                     }
-                    ETA = parseInt(arr_distance/parseInt(ground_speed)*60);
-                    ETA_till_gate = parseInt((arr_distance-150)/parseInt(ground_speed)*60)
                 }
+                ETA = parseInt(arr_distance/parseInt(ground_speed)*60);
+                ETA_till_gate = parseInt((arr_distance-150)/parseInt(ground_speed)*60)
                 status = "arriving"
             }
         }
