@@ -112,27 +112,7 @@ async function set_gate_to_callsign(gate_id, callsign){
             });
         });
 
-        if(gate["gate"].endsWith("L") || gate["gate"].endsWith("R")){
-            var other_gate_id = gate["gate"].substring(0, gate["gate"].length - 1) + (gate["gate"].endsWith("L") ? "R":"L");
-
-            var other_gate = await new Promise((resolve, reject) => {
-                db.findOne({"gate": other_gate_id}, (err, result) => {
-                    if (err) reject(err);
-                    resolve(result);
-                });
-            });
-            other_gate.occupied = true;
-            other_gate.assigned_to = callsign + "_b";
-            var other_result = await new Promise((resolve, reject) => {
-                db.update({"gate": other_gate_id}, other_gate, function(err, np){
-                    if (err) reject(err);
-                    resolve(other_gate);
-                });
-            });
-            return gate["gate"].endsWith("R") ? result : other_result;
-        }else{
-            return result
-        }
+       return result;
     }else{
         return "ERR: gate does not exist";
     }
@@ -153,25 +133,6 @@ async function clear_gate(gate_id){
             resolve("OK");
         });
     });
-
-    if(gate["gate"].endsWith("R")){
-        var other_gate_id = gate["gate"].substring(0, gate["gate"].length() - 1) + "L";
-
-        var other_gate = await new Promise((resolve, reject) => {
-            db.findOne({"gate": other_gate_id}, (err, result) => {
-                if (err) reject(err);
-                resolve(result);
-            });
-        });
-        other_gate.occupied = false;
-        other_gate.assigned_to = "none";
-        var other_result = await new Promise((resolve, reject) => {
-            db.update({"gate": other_gate_id}, other_gate, function(err, result){
-                if (err) reject(err);
-                resolve("OK");
-            });
-        });
-    }
     return result;
 }
 

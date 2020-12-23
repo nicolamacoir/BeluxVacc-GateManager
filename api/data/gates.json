@@ -200,14 +200,6 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "145L",
-		"apron": "apron-1-south",
-		"latitude": 50.90223333333333,
-		"longitude": 4.483208333333335,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
 		"gate": "145R",
 		"apron": "apron-1-south",
 		"latitude": 50.902266666666655,
@@ -220,14 +212,6 @@
 		"apron": "apron-1-south",
 		"latitude": 50.902427777777774,
 		"longitude": 4.483969444444445,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
-		"gate": "149L",
-		"apron": "apron-1-south",
-		"latitude": 50.90253333333333,
-		"longitude": 4.48433888888889,
 		"occupied": false,
 		"assigned_to": "none"
 	},
@@ -248,14 +232,6 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "153L",
-		"apron": "apron-1-south",
-		"latitude": 50.90285833333333,
-		"longitude": 4.485455555555555,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
 		"gate": "153R",
 		"apron": "apron-1-south",
 		"latitude": 50.9029111111111,
@@ -268,14 +244,6 @@
 		"apron": "apron-1-south",
 		"latitude": 50.90307222222222,
 		"longitude": 4.4862055555555544,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
-		"gate": "157L",
-		"apron": "apron-1-south",
-		"latitude": 50.90318055555556,
-		"longitude": 4.486574999999999,
 		"occupied": false,
 		"assigned_to": "none"
 	},
@@ -312,14 +280,6 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "165L",
-		"apron": "apron-1-south",
-		"latitude": 50.90389722222223,
-		"longitude": 4.489055555555555,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
 		"gate": "165R",
 		"apron": "apron-1-south",
 		"latitude": 50.90394999999999,
@@ -332,14 +292,6 @@
 		"apron": "apron-1-south",
 		"latitude": 50.90411388888889,
 		"longitude": 4.489805555555557,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
-		"gate": "169L",
-		"apron": "apron-1-south",
-		"latitude": 50.90425555555556,
-		"longitude": 4.490297222222222,
 		"occupied": false,
 		"assigned_to": "none"
 	},
@@ -368,14 +320,6 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "206L",
-		"apron": "apron-2-north",
-		"latitude": 50.90000555555556,
-		"longitude": 4.485669444444445,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
 		"gate": "206R",
 		"apron": "apron-2-north",
 		"latitude": 50.90002777777777,
@@ -388,14 +332,6 @@
 		"apron": "apron-2-north",
 		"latitude": 50.90015555555556,
 		"longitude": 4.485938888888888,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
-		"gate": "210L",
-		"apron": "apron-2-north",
-		"latitude": 50.90027499999999,
-		"longitude": 4.486591666666667,
 		"occupied": false,
 		"assigned_to": "none"
 	},
@@ -424,14 +360,6 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "230L",
-		"apron": "apron-2-north",
-		"latitude": 50.90107222222222,
-		"longitude": 4.4893583333333344,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
 		"gate": "230R",
 		"apron": "apron-2-north",
 		"latitude": 50.90110000000001,
@@ -444,14 +372,6 @@
 		"apron": "apron-2-north",
 		"latitude": 50.90122222222223,
 		"longitude": 4.489633333333334,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
-		"gate": "234L",
-		"apron": "apron-2-north",
-		"latitude": 50.90137777777778,
-		"longitude": 4.490413888888888,
 		"occupied": false,
 		"assigned_to": "none"
 	},
@@ -496,14 +416,6 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "205L",
-		"apron": "apron-2-south",
-		"latitude": 50.89929166666667,
-		"longitude": 4.485944444444445,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
 		"gate": "205R",
 		"apron": "apron-2-south",
 		"latitude": 50.899325000000005,
@@ -528,14 +440,6 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "211L",
-		"apron": "apron-2-south",
-		"latitude": 50.89974999999999,
-		"longitude": 4.487527777777777,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
 		"gate": "211R",
 		"apron": "apron-2-south",
 		"latitude": 50.89976944444444,
@@ -548,14 +452,6 @@
 		"apron": "apron-2-south",
 		"latitude": 50.89993333333334,
 		"longitude": 4.488286111111112,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
-		"gate": "217L",
-		"apron": "apron-2-south",
-		"latitude": 50.90005277777778,
-		"longitude": 4.488580555555555,
 		"occupied": false,
 		"assigned_to": "none"
 	},
@@ -576,14 +472,6 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "229L",
-		"apron": "apron-2-south",
-		"latitude": 50.90035833333333,
-		"longitude": 4.489636111111111,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
 		"gate": "229R",
 		"apron": "apron-2-south",
 		"latitude": 50.90037777777777,
@@ -596,14 +484,6 @@
 		"apron": "apron-2-south",
 		"latitude": 50.90031388888889,
 		"longitude": 4.490558333333334,
-		"occupied": false,
-		"assigned_to": "none"
-	},
-	{
-		"gate": "233L",
-		"apron": "apron-2-south",
-		"latitude": 50.900641666666665,
-		"longitude": 4.490730555555555,
 		"occupied": false,
 		"assigned_to": "none"
 	},
@@ -1406,5 +1286,5 @@
 		"longitude": 4.464836111111112,
 		"occupied": false,
 		"assigned_to": "none"
-	}
+	},
 ]

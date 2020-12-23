@@ -7,6 +7,8 @@ with open('gates.json', 'w') as outfile:
     for (key,row) in df.iterrows():
         if(row[0] == ''):
             continue
+        if(str(row[1]).rstrip().endswith("L")):
+            continue
         #outfile.write("\t\"{}\":{{\n".format(row[1]))
         outfile.write("\t{\n")
         outfile.write("\t\t\"gate\": \"{}\",\n".format(str(row[1]).rstrip()))
