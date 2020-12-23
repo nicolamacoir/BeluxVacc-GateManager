@@ -47,6 +47,16 @@ async function get_all_possible_gates_for(callsign, origin, ac){
     if(f.detect_GA(ac)){
         return [];
     }
+    if(ac == "A388"){
+        var super_gates = ["233R", "322", "328"]
+        var gates = await new Promise((resolve, reject) => {
+            db.find({"gate":{ $in: super_gates}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
+                if (err) reject(err);
+                resolve(result);
+            });
+        });
+        return (gates.length > 0 ? [gates[0]] : [])
+    }
     var gates = await new Promise((resolve, reject) => {
         db.find({"apron": { $in: apron}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
             if (err) reject(err);
