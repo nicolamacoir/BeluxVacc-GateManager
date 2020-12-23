@@ -40,7 +40,10 @@ async function get_all_gates(){
 }
 
 async function get_all_possible_gates_for(callsign, origin, ac){
-    apron = f.get_valid_aprons(callsign, origin, ac);
+    if(origin == "APRON")
+        apron = ac
+    else
+        apron = f.get_valid_aprons(callsign, origin, ac);
     var gates = await new Promise((resolve, reject) => {
         db.find({"apron": { $in: apron}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
             if (err) reject(err);
@@ -168,7 +171,10 @@ async function process_clients(clients){
             altitude = client["altitude"],
             status = "UNKNOWN",
             arr_distance = '',
+            ETA = '',
+            ETA_till_gate = '',
             AC_code = client["planned_aircraft"].split("/")[0];
+            ground_speed = client["groundspeed"]
         
         if (AC_code.length==1){
             AC_code = client["planned_aircraft"].split("/")[1];
@@ -195,11 +201,17 @@ async function process_clients(clients){
                 var cur_gate = await get_gate_for_callsign(callsign);
                 if (cur_gate == null){
                     let gate = await get_gate_for_gateid(closestGate["gate"]);
-                    if(gate.occupied == false){
-                        var result = set_gate_to_callsign(gate["gate"], callsign); 
-                        monitored_clients[callsign] = "AUTO-DEP"
-                        load_active_clients();
+                    if(gate.occupied == true){
+                        /* Gate was already assigned => double booking
+                           Make new reservation for that client */
+                        var other_callsign = gate.assigned_to;
+                        var other_apron = gate.apron;
+                        clear_gate(gate["gate"]);
+                        request_gate_for(other_callsign, "APRON", other_apron);
                     }
+                    var result = set_gate_to_callsign(gate["gate"], callsign); 
+                    monitored_clients[callsign] = "AUTO-DEP"
+                    load_active_clients();
                 }
                 status = "at_gate"
             }
@@ -226,15 +238,24 @@ async function process_clients(clients){
                 }
                 status = "arriving"
                 arr_distance = parseInt(distance)
+                ETA = arr_distance/parseInt(ground_speed)*60;
+                ETA_till_gate = (arr_distance-150)/parseInt(ground_speed)*60
             }
         }
         var result = await get_gate_for_callsign(callsign);
         var gate = (result== null ? "": (result["gate"])) 
-        if(client["planned_depairport"] == "EBBR"){
-            output_clients.push({"type": "D", "callsign" : callsign, "airport": client["planned_destairport"], "ac": AC_code, "status": status, "distance": arr_distance, "reservation": gate})
-        }else{
-            output_clients.push({"type": "A", "callsign" :callsign, "airport": client["planned_depairport"], "ac": AC_code, "status": status,  "distance": arr_distance, "reservation": gate})
-        }
+        output_clients.push(
+            {"type"     : (client["planned_depairport"] == "EBBR" ? "D":"A"),
+             "callsign" : callsign, 
+             "airport"  : (client["planned_depairport"] == "EBBR"?client["planned_destairport"]:client["planned_depairport"]),
+             "ac"       : AC_code,
+             "status"   : status,
+             "distance" : arr_distance,
+             "eta"      : ETA,
+             "eta_till_gate": ETA_till_gate,
+             "reservation": gate
+            })
+
     }
     active_clients = output_clients
     return {"status": "ok"}
