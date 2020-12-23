@@ -122,9 +122,9 @@ async function set_gate_to_callsign(gate_id, callsign){
                 });
             });
             other_gate.occupied = true;
-            other_gate.assigned_to = callsign;
+            other_gate.assigned_to = callsign + "_b";
             var other_result = await new Promise((resolve, reject) => {
-                db.update({"gate": other_gate_id}, other_gate, function(err, result){
+                db.update({"gate": other_gate_id}, other_gate, function(err, np){
                     if (err) reject(err);
                     resolve(other_gate);
                 });
