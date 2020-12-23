@@ -79,13 +79,16 @@ async function get_gate_for_callsign(callsign){
 async function set_gate_to_callsign(gate_id, callsign){
     /* Check if already has a reservation, if yes, return error*/
     var cur_gate = await get_gate_for_gateid(gate_id);
-    if (cur_gate != null){ 
+    if (cur_gate.assigned_to != "none"){ 
+        console.log("ERR: gate " + gate_id + " already assigned to " + cur_gate.assigned_to);
         return "ERR: already assigned to a gate"
     }
 
     /* Check if gate is not occupied */
     var curr_reservation = await get_gate_for_callsign(callsign);
     if (curr_reservation != null){ 
+        console.log("ERR: gate already occupied")
+        console.log("ERR: "+ callsign +" already assigned to gate: " + gate_id)
         return "ERR: gate already occupied"
     }
     
@@ -109,8 +112,8 @@ async function set_gate_to_callsign(gate_id, callsign){
             });
         });
 
-        if(temp_gate["gate"].endsWith("L") || temp_gate["gate"].endsWith("R")){
-            var other_gate_id = temp_gate["gate"].substring(0, temp_gate["gate"].length() - 1) + (temp_gate["gate"].endsWith("L") ? "R":"L");
+        if(gate["gate"].endsWith("L") || gate["gate"].endsWith("R")){
+            var other_gate_id = gate["gate"].substring(0, gate["gate"].length - 1) + (gate["gate"].endsWith("L") ? "R":"L");
 
             var other_gate = await new Promise((resolve, reject) => {
                 db.findOne({"gate": other_gate_id}, (err, result) => {
@@ -126,7 +129,7 @@ async function set_gate_to_callsign(gate_id, callsign){
                     resolve(gate);
                 });
             });
-            return temp_gate["gate"].endsWith("R") ? result : other_result;
+            return gate["gate"].endsWith("R") ? result : other_result;
         }else{
             return result
         }
@@ -181,7 +184,7 @@ async function request_gate_for(callsign, origin, ac){
     var temp_gate = gates[Math.floor(Math.random() * gates.length)];
 
     var result = await set_gate_to_callsign(temp_gate["gate"], callsign)
-    while(result.startsWith("ERR")){
+    while(typeof result === 'string' && result.startsWith("ERR")){
         var temp_gate = gates[Math.floor(Math.random() * gates.length)];
         var result = await set_gate_to_callsign(temp_gate["gate"], callsign)
     }
@@ -281,9 +284,9 @@ async function process_clients(clients){
                 }
             }else{
                 var location_client = {"latitude": lat, "longitude": long} 
-                var distance = f.worldDistance(location_client, location_brussels)
-                if(ground_speed > 50){
-                    if (distance < 150 && monitored_clients[callsign] != "MANUAL"){
+                arr_distance = parseInt(f.worldDistance(location_client, location_brussels))
+                if(parseInt(ground_speed) > 50){
+                    if (arr_distance < 150){
                         var cur_gate = await get_gate_for_callsign(callsign);
                         if (cur_gate == null){
                             var result = await request_gate_for(callsign, client["planned_depairport"], AC_code)
@@ -294,7 +297,6 @@ async function process_clients(clients){
                     ETA_till_gate = (arr_distance-150)/parseInt(ground_speed)*60
                 }
                 status = "arriving"
-                arr_distance = parseInt(distance)
             }
         }
         var result = await get_gate_for_callsign(callsign);
@@ -312,7 +314,8 @@ async function process_clients(clients){
              "eta"      : ETA,
              "eta_till_gate": ETA_till_gate,
              "reservation": gate
-            })
+            }
+        );
 
     }
     active_clients = output_clients
