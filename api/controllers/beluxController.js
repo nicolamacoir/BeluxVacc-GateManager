@@ -78,9 +78,15 @@ async function get_gate_for_callsign(callsign){
 
 async function set_gate_to_callsign(gate_id, callsign){
     /* Check if already has a reservation, if yes, return error*/
+    var cur_gate = await get_gate_for_gateid(gate_id);
+    if (cur_gate != null){ 
+        return "ERR: already assigned to a gate"
+    }
+
+    /* Check if gate is not occupied */
     var curr_reservation = await get_gate_for_callsign(callsign);
     if (curr_reservation != null){ 
-        return "ERR: occupied"
+        return "ERR: gate already occupied"
     }
     
     /* Get gate */
@@ -102,7 +108,28 @@ async function set_gate_to_callsign(gate_id, callsign){
                 resolve(gate);
             });
         });
-        return result
+
+        if(temp_gate["gate"].endsWith("L") || temp_gate["gate"].endsWith("R")){
+            var other_gate_id = temp_gate["gate"].substring(0, temp_gate["gate"].length() - 1) + (temp_gate["gate"].endsWith("L") ? "R":"L");
+
+            var other_gate = await new Promise((resolve, reject) => {
+                db.findOne({"gate": other_gate_id}, (err, result) => {
+                    if (err) reject(err);
+                    resolve(result);
+                });
+            });
+            other_gate.occupied = true;
+            other_gate.assigned_to = callsign;
+            var other_result = await new Promise((resolve, reject) => {
+                db.update({"gate": other_gate_id}, other_gate, function(err, result){
+                    if (err) reject(err);
+                    resolve(gate);
+                });
+            });
+            return temp_gate["gate"].endsWith("R") ? result : other_result;
+        }else{
+            return result
+        }
     }else{
         return "ERR: gate does not exist";
     }
@@ -123,6 +150,25 @@ async function clear_gate(gate_id){
             resolve("OK");
         });
     });
+
+    if(gate["gate"].endsWith("R")){
+        var other_gate_id = gate["gate"].substring(0, gate["gate"].length() - 1) + "L";
+
+        var other_gate = await new Promise((resolve, reject) => {
+            db.findOne({"gate": other_gate_id}, (err, result) => {
+                if (err) reject(err);
+                resolve(result);
+            });
+        });
+        other_gate.occupied = false;
+        other_gate.assigned_to = "none";
+        var other_result = await new Promise((resolve, reject) => {
+            db.update({"gate": other_gate_id}, other_gate, function(err, result){
+                if (err) reject(err);
+                resolve("OK");
+            });
+        });
+    }
     return result;
 }
 
@@ -133,8 +179,9 @@ async function request_gate_for(callsign, origin, ac){
     }
     var gates = await get_all_possible_gates_for(callsign, origin, ac);
     var temp_gate = gates[Math.floor(Math.random() * gates.length)];
+
     var result = await set_gate_to_callsign(temp_gate["gate"], callsign)
-    while(result == "ERR: occupied"){
+    while(result.startsWith("ERR")){
         var temp_gate = gates[Math.floor(Math.random() * gates.length)];
         var result = await set_gate_to_callsign(temp_gate["gate"], callsign)
     }
@@ -346,22 +393,14 @@ exports.change_gate = async function(req, res){
     var old_gate = await get_gate_for_callsign(callsign);
     var result = await clear_gate(old_gate["gate"]);
     var new_gate = await set_gate_to_callsign(requested_gateid, callsign);
-    if(new_gate == "ERR: occupied"){
+    if(new_gate.startsWith("ERR")){
         res.status(500).send(
         {
             error: {
               status: 500,
-              message: "Gate already in use.",
+              message: new_gate,
             }
         });
-    }else if (new_gate == "ERR: gate does not exist"){
-        res.status(500).send(
-            {
-                error: {
-                  status: 500,
-                  message: "Gate does not exist.",
-                }
-            });
     }else{
         res.json(new_gate);
         monitored_clients[callsign] = "MANUAL"
