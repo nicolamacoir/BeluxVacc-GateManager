@@ -41,7 +41,7 @@ async function get_all_gates(){
 
 async function get_all_possible_gates_for(callsign, origin, ac){
     if(origin == "APRON")
-        apron = ac
+        apron = [ac]
     else
         apron = f.get_valid_aprons(callsign, origin, ac);
     if(f.detect_GA(ac)){
@@ -126,7 +126,7 @@ async function set_gate_to_callsign(gate_id, callsign){
             var other_result = await new Promise((resolve, reject) => {
                 db.update({"gate": other_gate_id}, other_gate, function(err, result){
                     if (err) reject(err);
-                    resolve(gate);
+                    resolve(other_gate);
                 });
             });
             return gate["gate"].endsWith("R") ? result : other_result;
@@ -293,8 +293,8 @@ async function process_clients(clients){
                             monitored_clients[callsign] = "AUTO_ARR"
                         }
                     }
-                    ETA = arr_distance/parseInt(ground_speed)*60;
-                    ETA_till_gate = (arr_distance-150)/parseInt(ground_speed)*60
+                    ETA = parseInt(arr_distance/parseInt(ground_speed)*60);
+                    ETA_till_gate = parseInt((arr_distance-150)/parseInt(ground_speed)*60)
                 }
                 status = "arriving"
             }
@@ -312,7 +312,7 @@ async function process_clients(clients){
              "status"   : status,
              "distance" : arr_distance,
              "eta"      : ETA,
-             "eta_till_gate": ETA_till_gate,
+             "eta_till_gate": (ETA_till_gate > 0 ? ETA_till_gate : ''),
              "reservation": gate
             }
         );
