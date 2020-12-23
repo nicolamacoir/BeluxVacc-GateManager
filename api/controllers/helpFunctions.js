@@ -13,7 +13,7 @@ var GA_AC = {
                 'L' :      ['LNC2','LNCE','LNT4','LEG2','LNP4','LJ23','LJ25','LJ31','LJ35','LJ40','LJ45','LJ55','LJ60'],
                 'P' :      ['P28A','P28B','P28R','P28S','P28T','P28U','P32R','P32T','P46T','PA11','PA12','PA14','PA15','PA16','PA17','PA18','PA20','PA22','PA23','PA24','PA25','PA27','PA30','PA31','PA32','PA34','PA36','PA38','PA44','PA46','PA47','PAT4','PAY1','PAY2','PAY3','PAY4','PILL'],
                 'T' :      ['TGRS','TBM9'],
-                'S' :      ['SNGY','SR22','S108','SSSS']
+                'S' :      ['SNGY','SR22','S108',]
 }
 
 function vectorDistance(dx, dy) {
