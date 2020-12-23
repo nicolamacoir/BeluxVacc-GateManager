@@ -368,7 +368,7 @@ exports.change_gate = async function(req, res){
     var old_gate = await get_gate_for_callsign(callsign);
     var result = await clear_gate(old_gate["gate"]);
     var new_gate = await set_gate_to_callsign(requested_gateid, callsign);
-    if(typeof result === 'string' && new_gate.startsWith("ERR")){
+    if(typeof new_gate === 'string' && new_gate.startsWith("ERR")){
         res.status(500).send(
         {
             error: {
