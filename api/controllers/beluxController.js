@@ -44,6 +44,9 @@ async function get_all_possible_gates_for(callsign, origin, ac){
         apron = ac
     else
         apron = f.get_valid_aprons(callsign, origin, ac);
+    if(f.detect_GA(ac)){
+        return [];
+    }
     var gates = await new Promise((resolve, reject) => {
         db.find({"apron": { $in: apron}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
             if (err) reject(err);
@@ -125,6 +128,9 @@ async function clear_gate(gate_id){
 
 
 async function request_gate_for(callsign, origin, ac){
+    if(f.detect_GA(ac)){
+        return null;
+    }
     var gates = await get_all_possible_gates_for(callsign, origin, ac);
     var temp_gate = gates[Math.floor(Math.random() * gates.length)];
     var result = await set_gate_to_callsign(temp_gate["gate"], callsign)
@@ -244,6 +250,9 @@ async function process_clients(clients){
         }
         var result = await get_gate_for_callsign(callsign);
         var gate = (result== null ? "": (result["gate"])) 
+        if (f.detect_GA(AC_code)){
+            gate = "GA"
+        }
         output_clients.push(
             {"type"     : (client["planned_depairport"] == "EBBR" ? "D":"A"),
              "callsign" : callsign, 
