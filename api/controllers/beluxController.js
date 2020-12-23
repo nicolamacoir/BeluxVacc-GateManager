@@ -235,17 +235,17 @@ async function process_clients(clients){
             }else{
                 var location_client = {"latitude": lat, "longitude": long} 
                 var distance = f.worldDistance(location_client, location_brussels)
-                if (distance < 150 && monitored_clients[callsign] != "MANUAL"){
+                if (distance < 150 && monitored_clients[callsign] != "MANUAL" && ground_speed > 50){
                     var cur_gate = await get_gate_for_callsign(callsign);
                     if (cur_gate == null){
                         var result = await request_gate_for(callsign, client["planned_depairport"], AC_code)
                         monitored_clients[callsign] = "AUTO_ARR"
                     }
+                    ETA = arr_distance/parseInt(ground_speed)*60;
+                    ETA_till_gate = (arr_distance-150)/parseInt(ground_speed)*60
                 }
                 status = "arriving"
                 arr_distance = parseInt(distance)
-                ETA = arr_distance/parseInt(ground_speed)*60;
-                ETA_till_gate = (arr_distance-150)/parseInt(ground_speed)*60
             }
         }
         var result = await get_gate_for_callsign(callsign);
