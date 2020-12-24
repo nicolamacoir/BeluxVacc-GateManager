@@ -365,11 +365,13 @@ exports.get_gate_for_callsign_for_plugin = async function(req, res){
     var gate = await get_gate_for_callsign(callsign,ac);
     if(gate == null){
         res.json([]);
-    }else if( gate.gate == "MIL" ||  gate.gate == "GA" ||  gate.gate.startsWith("9") ||
-       (parseInt(gate.gate) >= 120 && parseInt(gate.gate)  <= 174 && parseInt(gate.gate) %2 == 0)){
-           gate.gate += "*"   
-    }
-    res.json(gate)
+    }else{
+        if( gate.gate == "MIL" ||  gate.gate == "GA" ||  gate.gate.startsWith("9") ||
+            (parseInt(gate.gate) >= 120 && parseInt(gate.gate)  <= 174 && parseInt(gate.gate) %2 == 0)){
+                gate.gate += "*"   
+        }
+        res.json(gate)
+    } 
 }
 
 
