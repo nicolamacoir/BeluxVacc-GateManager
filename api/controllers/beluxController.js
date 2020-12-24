@@ -40,11 +40,16 @@ async function get_all_gates(){
 }
 
 async function get_all_possible_gates_for(callsign, origin, ac){
+    
+    /* rebooking on specific APRON*/
     if(origin == "APRON")
         apron = [ac]
     else
         apron = f.get_valid_aprons(callsign, origin, ac);
-    if(f.detect_GA(ac)){
+
+
+    /*First handle special cases*/
+    if(f.detect_GA(ac) || f.detect_MIL(ac, callsign)){
         return [];
     }
     if(ac == "A388"){
@@ -57,6 +62,7 @@ async function get_all_possible_gates_for(callsign, origin, ac){
         });
         return (gates.length > 0 ? [gates[0]] : [])
     }
+    /* Find all gates on specific apron */
     var gates = await new Promise((resolve, reject) => {
         db.find({"apron": { $in: apron}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
             if (err) reject(err);
@@ -76,13 +82,20 @@ async function get_gate_for_gateid(gate_id){
     return gate
 }
 
-async function get_gate_for_callsign(callsign){
+async function get_gate_for_callsign(callsign,ac_type=null){
     var gate = await new Promise((resolve, reject) => {
         db.findOne({"assigned_to" : callsign},{"_id": 0, "__v":0, "apron":0, "latitude":0, "longitude":0, "occupied":0}, (err, result) => {
             if (err) reject(err);
             resolve(result);
         });
     });
+    if(gate == null && ac_type != null){
+        if(f.detect_GA(ac_type)){
+            gate =  {"gate": "GA", "assigned_to": callsign};
+        }else if(f.detect_MIL(ac_type, callsign)){
+            gate = {"gate": "MIL", "assigned_to": callsign};
+        }
+    }
     return gate
 }
 
@@ -129,6 +142,8 @@ async function set_gate_to_callsign(gate_id, callsign){
 }
 
 async function clear_gate(gate_id){
+    if(gate_id in  ["GA", "MIL"])
+        return null;
     var gate = await new Promise((resolve, reject) => {
         db.findOne({"gate": gate_id}, (err, result) => {
             if (err) reject(err);
@@ -148,9 +163,6 @@ async function clear_gate(gate_id){
 
 
 async function request_gate_for(callsign, origin, ac){
-    if(f.detect_GA(ac)){
-        return null;
-    }
     var gates = await get_all_possible_gates_for(callsign, origin, ac);
     var temp_gate = gates[Math.floor(Math.random() * gates.length)];
 
@@ -225,7 +237,7 @@ async function process_clients(clients){
                 }
             }else{
                 // AC is at gate
-                var cur_gate = await get_gate_for_callsign(callsign);
+                var cur_gate = await get_gate_for_callsign(callsign, AC_code);
                 if (cur_gate == null){
                     let gate = await get_gate_for_gateid(closestGate["gate"]);
                     if(gate.occupied == true){
@@ -260,7 +272,7 @@ async function process_clients(clients){
                     /* not yet departed from origin*/
                     continue
                 if (arr_distance < 150){
-                    var cur_gate = await get_gate_for_callsign(callsign);
+                    var cur_gate = await get_gate_for_callsign(callsign, AC_code);
                     if (cur_gate == null){
                         var result = await request_gate_for(callsign, client["planned_depairport"], AC_code)
                         monitored_clients[callsign] = "AUTO_ARR"
@@ -271,11 +283,8 @@ async function process_clients(clients){
                 status = "arriving"
             }
         }
-        var result = await get_gate_for_callsign(callsign);
+        var result = await get_gate_for_callsign(callsign, AC_code);
         var gate = (result== null ? "": (result["gate"])) 
-        if (f.detect_GA(AC_code)){
-            gate = "GA"
-        }
         output_clients.push(
             {"type"     : (client["planned_depairport"] == "EBBR" ? "D":"A"),
              "callsign" : callsign, 
@@ -285,7 +294,7 @@ async function process_clients(clients){
              "distance" : arr_distance,
              "eta"      : ETA,
              "eta_till_gate": (ETA_till_gate > 0 ? ETA_till_gate : ''),
-             "reservation": gate
+             "reservation": (arr_distance < 150 ?gate : '')
             }
         );
 
@@ -347,6 +356,23 @@ exports.get_gate_for_callsign = async function(req, res){
     var gate = await get_gate_for_callsign(callsign)
     res.json(gate)
 }
+
+/* /POST/get_gate*/
+exports.get_gate_for_callsign_for_plugin = async function(req, res){
+    callsign = req.body.callsign;
+    ac = req.body.aircraft;
+    
+    var gate = await get_gate_for_callsign(callsign,ac);
+
+    if( gate.gate == "MIL"        ||
+        gate.gate == "GA"         ||
+        gate.gate.startsWith("9") ||
+       (parseInt(gate.gate) >= 120 && parseInt(gate.gate)  <= 174 && parseInt(gate.gate) %2 == 0)){
+           gate.gate += "*"
+       }
+    res.json(gate)
+}
+
 
 
 /* /POST/request_gate */

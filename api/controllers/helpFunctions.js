@@ -4,7 +4,7 @@ var gates_json = JSON.parse(fs.readFileSync('api/data/gates.json', 'utf8'));
 var shengen_prefixes = ["EL", "EH", "EB", "ED", "LP", "LO", "LK", "EK", "EE", "EF", "LG", "LH", "BI", "LI", "EV", "EY", "LM", "EN", "EP", "LP", "LZ", "LJ", "LE", "ES", "LS"];
 var cargo_icaos = ['DHL', 'DHK', 'BCS', 'CLX','FDX', 'BOX','GEC','TAY','ABW','CTJ','MSX','LCO','QAC','SQC','CKS','PAC','UPS','ABD','MZN','NPT','NCA','MPH','ABR','AHK','GTI','CKK','DSR','NWA','EIA']
 var low_costs_icaos = ['RYR', 'EZY', 'EZS', 'EJU', 'LDA', 'LDM', 'WZZ'];
-var GA_AC = {
+var GA_aircraft = {
                 'A' :      ['AEST'],
                 'B' :      ['B18T','B190','B350','B36T','BE10','BE17','BE18','BE20','BE23','BE24','BE30','BE35','BE36','BE40','BE50','BE55','BE58','BE60','BE65','BE70','BE76','BE77','BE80','BE88','BE95','BE99','BE9L','BE9T'],
                 'C' :      ['C02T','C06T','C07T','C10T','C120','C140','C150','C152','C162','C170','C172','C175','C177','C180','C182','C185','C188','C190','C195','C25C','C205','C206','C207','C208','C210','C21T','C25A','C25B','C303','C310','C320','C335','C336','C337','C340','C402','C404','C411','C414','C421','C425','C441','C500','C501','C510','C525','C526','C550','C551','C560','C56X','C650','C680','C72R','C750','C77R','C82R','COL3','COL4'],
@@ -15,6 +15,8 @@ var GA_AC = {
                 'T' :      ['TGRS','TBM9'],
                 'S' :      ['SNGY','SR22','S108']
 }
+var MIL_icaos = ['BAF','AYB','BYN','DAF','DAR','DNY','GAF','GAM','GNY','PLF','PNY','FAG','ASY','ASF','CFC','HRZ','EEF','FNF','RFR','RRR','KRF','KRH','RRF','NVY','NOH','KIN','LCS','CAP','RCH','AIO','PAT','CNV','CGX','AAF','RFF','CHD','TTF','HKY','AAC','AKG','CFC','CWL','FAF','MJN','NATO']
+var MIL_aircraft = ['V22', 'B52', 'C17','K35R','H47','K35E','E3CF','E3TF','P2','P3','P8','A400','C130','C30J','C141','C5M']
 
 function vectorDistance(dx, dy) {
     return Math.sqrt(dx * dx + dy * dy);
@@ -65,9 +67,21 @@ function is_on_brussels_ground  (lat, long, altitude){
 
 function detect_GA(actype){
     var first_letter = actype.charAt(0);
-    if(first_letter in GA_AC){
-        if (GA_AC[first_letter].includes(actype))
+    if(first_letter in GA_aircraft){
+        if (GA_aircraft[first_letter].includes(actype))
             return true;
+    }
+    return false;
+}
+
+function detect_MIL(actype, callsign){
+    if (MIL_aircraft.includes(actype))
+        return true;
+
+    for(i=0;i<MIL_icaos.length;i++){
+        if(callsign.startsWith(MIL_icaos[i])){
+            return true;
+        }
     }
     return false;
 }
@@ -103,5 +117,6 @@ module.exports = {
     get_gate_for_position: get_gate_for_position,
     is_on_brussels_ground: is_on_brussels_ground,
     get_valid_aprons: get_valid_aprons,
-    detect_GA: detect_GA
+    detect_GA: detect_GA,
+    detect_MIL: detect_MIL,
 }
