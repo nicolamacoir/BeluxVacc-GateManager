@@ -2,8 +2,8 @@ var fs = require('fs');
 var gates_json = JSON.parse(fs.readFileSync('api/data/gates.json', 'utf8'));
 
 var shengen_prefixes = ["EL", "EH", "EB", "ED", "LP", "LO", "LK", "EK", "EE", "EF", "LG", "LH", "BI", "LI", "EV", "EY", "LM", "EN", "EP", "LP", "LZ", "LJ", "LE", "ES", "LS"];
-var cargo_icaos = ['DHL', 'DHK', 'BCS', 'CLX','FDX', 'BOX','GEC','TAY','ABW','CTJ','MSX','LCO','QAC','SQC','CKS','PAC','UPS','ABD','MZN','NPT','NCA','MPH','ABR','AHK','GTI','CKK','DSR','NWA','EIA']
-var low_costs_icaos = ['RYR', 'EZY', 'EZS', 'EJU', 'LDA', 'LDM', 'WZZ'];
+var cargo_icaos = ['DHL','DHK','BCS','CLX','FDX','BOX','GEC','TAY','ABW','CTJ','MSX','LCO','QAC','SQC','CKS','PAC','UPS','ABD','MZN','NPT','NCA','MPH','ABR','AHK','GTI','CKK','DSR','NWA','EIA','RCF','AIC','MAS','SHQ','LTG']
+var low_costs_icaos = ['RYR','RYS','MAY','RUK','LDA','LDM','EZY','EZS','EJU','WZZ'];
 var GA_aircraft = {
                 'A' :      ['AEST'],
                 'B' :      ['B18T','B190','B350','B36T','BE10','BE17','BE18','BE20','BE23','BE24','BE30','BE35','BE36','BE40','BE50','BE55','BE58','BE60','BE65','BE70','BE76','BE77','BE80','BE88','BE95','BE99','BE9L','BE9T'],
@@ -16,7 +16,7 @@ var GA_aircraft = {
                 'S' :      ['SNGY','SR22','S108']
 }
 var MIL_icaos = ['BAF','AYB','BYN','DAF','DAR','DNY','GAF','GAM','GNY','PLF','PNY','FAG','ASY','ASF','CFC','HRZ','EEF','FNF','RFR','RRR','KRF','KRH','RRF','NVY','NOH','KIN','LCS','CAP','RCH','AIO','PAT','CNV','CGX','AAF','RFF','CHD','TTF','HKY','AAC','AKG','CFC','CWL','FAF','MJN','NATO']
-var MIL_aircraft = ['V22', 'B52', 'C17','K35R','H47','K35E','E3CF','E3TF','P2','P3','P8','A400','C130','C30J','C141','C5M']
+var MIL_aircraft = ['A10','A4','A400','A6','A7','AJET','B1','B17','B29','B52','C130','C141','C17','C30J','C5M','CAT','CORS','DC3','E314','E3CF','E3TF','EUFI','F111','F14','F15','F16','F18','F22','F4','F9F','FURY','H47','HAR','HURI','K35E','K35R','LANC','ME09','MG23','P2','P3','P40','P51','P8','S2P','S37','SPIT','SSAB','SU25','T2','T28','T6','U16','V22','VF35','Y130','ZERO']
 
 function vectorDistance(dx, dy) {
     return Math.sqrt(dx * dx + dy * dy);
