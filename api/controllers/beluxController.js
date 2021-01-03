@@ -39,19 +39,7 @@ async function get_all_gates(){
     return gates
 }
 
-async function get_all_possible_gates_for(callsign, origin, ac){
-    
-    /* rebooking on specific APRON*/
-    if(origin == "APRON")
-        apron = [ac]
-    else
-        apron = f.get_valid_aprons(callsign, origin, ac);
-
-
-    /*First handle special cases*/
-    if(f.detect_GA(ac) || f.detect_MIL(ac, callsign)){
-        return [];
-    }
+async function get_all_possible_gates_for(ac, apron){
     if(ac == "A388"){
         var super_gates = ["233R", "322", "328"]
         var gates = await new Promise((resolve, reject) => {
@@ -89,30 +77,23 @@ async function get_gate_for_callsign(callsign,ac_type=null){
             resolve(result);
         });
     });
-    if(gate == null && ac_type != null){
-        if(f.detect_GA(ac_type)){
-            gate =  {"gate": "GA", "assigned_to": callsign};
-        }else if(f.detect_MIL(ac_type, callsign)){
-            gate = {"gate": "MIL", "assigned_to": callsign};
-        }
-    }
     return gate
 }
 
 async function set_gate_to_callsign(gate_id, callsign){
-    /* Check if already has a reservation, if yes, return error*/
+
+    /* Check if gate is not occupied */
     var cur_gate = await get_gate_for_gateid(gate_id);
     if (cur_gate.assigned_to != "none"){ 
         console.log("ERR: gate " + gate_id + " already assigned to " + cur_gate.assigned_to);
-        return "ERR: already assigned to a gate"
+        return "ERR: gate already occupied"
     }
 
-    /* Check if gate is not occupied */
+    /* Check if already has a reservation, if yes, return error*/
     var curr_reservation = await get_gate_for_callsign(callsign);
     if (curr_reservation != null){ 
-        console.log("ERR: gate already occupied")
         console.log("ERR: "+ callsign +" already assigned to gate: " + gate_id)
-        return "ERR: gate already occupied"
+        return "ERR: already assigned to a gate"
     }
     
     /* Get gate */
@@ -142,8 +123,6 @@ async function set_gate_to_callsign(gate_id, callsign){
 }
 
 async function clear_gate(gate_id){
-    if(gate_id in  ["GA", "MIL"])
-        return null;
     var gate = await new Promise((resolve, reject) => {
         db.findOne({"gate": gate_id}, (err, result) => {
             if (err) reject(err);
@@ -163,7 +142,12 @@ async function clear_gate(gate_id){
 
 
 async function request_gate_for(callsign, origin, ac){
-    var gates = await get_all_possible_gates_for(callsign, origin, ac);
+    var aprons = f.get_valid_aprons(callsign,origin, ac);
+    return await request_gate_on_apron(callsign, ac, aprons);
+}
+
+async function request_gate_on_apron(callsign, ac, apron){
+    var gates = await get_all_possible_gates_for(ac, apron);
     var temp_gate = gates[Math.floor(Math.random() * gates.length)];
 
     var result = await set_gate_to_callsign(temp_gate["gate"], callsign)
@@ -246,7 +230,7 @@ async function process_clients(clients){
                         var other_callsign = gate.assigned_to;
                         var other_apron = gate.apron;
                         clear_gate(gate["gate"]);
-                        request_gate_for(other_callsign, "APRON", other_apron);
+                        request_gate_on_apron(other_callsign, AC_code, other_apron);
                     }
                     var result = set_gate_to_callsign(gate["gate"], callsign); 
                     monitored_clients[callsign] = "AUTO-DEP"
@@ -337,7 +321,8 @@ exports.list_all_valid_gates = async function(req, res) {
     origin = req.body.origin;
     ac = req.body.aircraft;
 
-    var gates =  await get_all_possible_gates_for(callsign, origin, ac)
+    var aprons = f.get_valid_aprons(callsign, origin, ac)
+    var gates =  await get_all_possible_gates_for(ac, aprons)
     res.json(gates)
 };
 
@@ -354,24 +339,12 @@ exports.get_gate_for_callsign = async function(req, res){
     callsign = req.body.callsign;
     
     var gate = await get_gate_for_callsign(callsign)
-    res.json(gate)
+    res.json(gate == null? [] : gate)
 }
 
 /* /POST/get_gate*/
 exports.get_gate_for_callsign_for_plugin = async function(req, res){
-    callsign = req.body.callsign;
-    ac = req.body.aircraft;
-    
-    var gate = await get_gate_for_callsign(callsign,ac);
-    if(gate == null){
-        res.json([]);
-    }else{
-        if( gate.gate == "MIL" ||  gate.gate == "GA" ||  gate.gate.startsWith("9") ||
-            (parseInt(gate.gate) >= 120 && parseInt(gate.gate)  <= 174 && parseInt(gate.gate) %2 == 0)){
-                gate.gate += "*"   
-        }
-        res.json(gate)
-    } 
+    exports.get_gate_for_callsign(req, res);
 }
 
 

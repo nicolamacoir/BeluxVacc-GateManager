@@ -1288,7 +1288,7 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "MIL1",
+		"gate": "MIL01",
 		"apron": "apron-MIL",
 		"latitude": 50.9148102028943,
 		"longitude": 4.49671642402926,
@@ -1296,7 +1296,7 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "MIL2",
+		"gate": "MIL02",
 		"apron": "apron-MIL",
 		"latitude": 50.9145949648084,
 		"longitude": 4.49616261444872,
@@ -1304,7 +1304,7 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "MIL3",
+		"gate": "MIL03",
 		"apron": "apron-MIL",
 		"latitude": 50.9144179905254,
 		"longitude": 4.49564673703123,
@@ -1312,7 +1312,7 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "MIL5",
+		"gate": "MIL05",
 		"apron": "apron-MIL",
 		"latitude": 50.9139886918655,
 		"longitude": 4.49443353948016,
@@ -1320,7 +1320,7 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "MIL7",
+		"gate": "MIL07",
 		"apron": "apron-MIL",
 		"latitude": 50.9137384127494,
 		"longitude": 4.49378396702627,
@@ -1328,7 +1328,7 @@
 		"assigned_to": "none"
 	},
 	{
-		"gate": "MIL9",
+		"gate": "MIL09",
 		"apron": "apron-MIL",
 		"latitude": 50.9135108851123,
 		"longitude": 4.49312537273273,
@@ -1364,6 +1364,86 @@
 		"apron": "apron-MIL",
 		"latitude": 50.9125268152553,
 		"longitude": 4.48943544027958,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA01",
+		"apron": "apron-GA",
+		"latitude": 50.8962457664644,
+		"longitude": 4.46722481037306,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA02",
+		"apron": "apron-GA",
+		"latitude": 50.8963837586831,
+		"longitude": 4.46778502646987,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA03",
+		"apron": "apron-GA",
+		"latitude": 50.8954695143968,
+		"longitude": 4.46652048291858,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA04",
+		"apron": "apron-GA",
+		"latitude": 50.8957664803379,
+		"longitude": 4.46790751686512,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA05",
+		"apron": "apron-GA",
+		"latitude": 50.8959323231094,
+		"longitude": 4.46842626551081,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA06",
+		"apron": "apron-GA",
+		"latitude": 50.8970026980506,
+		"longitude": 4.46463632134401,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA07",
+		"apron": "apron-GA",
+		"latitude": 50.8971752854549,
+		"longitude": 4.46528787672485,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA08",
+		"apron": "apron-GA",
+		"latitude": 50.8973158169011,
+		"longitude": 4.46589393550867,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA09",
+		"apron": "apron-GA",
+		"latitude": 50.8974619486347,
+		"longitude": 4.46641375704692,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "GA10",
+		"apron": "apron-GA",
+		"latitude": 50.8976379721548,
+		"longitude": 4.46703734934814,
 		"occupied": false,
 		"assigned_to": "none"
 	}

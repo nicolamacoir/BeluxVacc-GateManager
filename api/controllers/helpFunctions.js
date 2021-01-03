@@ -66,7 +66,7 @@ function is_on_brussels_ground  (lat, long, altitude){
 }
 
 function is_on_GA_parking (lat, long, altitude){
-    if(lat < 50.915 && lat > 50.886 && long < 4.524 && long > 4.45 && altitude < 200){
+    if(lat < 50.897989 && lat > 50.897117 && long < 4.467701 && long > 4.465336  && altitude < 200){
         return true
     }else{
         return false
@@ -97,7 +97,7 @@ function detect_MIL(actype, callsign){
 function get_valid_aprons (callsign, origin, actype){
     var i;
     if(detect_GA(actype)){
-        return ["GA"];
+        return ["apron-GA"];
     }
     if(detect_MIL(actype, callsign)){
         return ["apron-MIL"]
