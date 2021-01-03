@@ -10,9 +10,6 @@ module.exports = function(app) {
     app.route('/get_gate/')
     .post(belux.get_gate_for_callsign)
 
-    app.route('/get_gate_for_plugin/')
-    .post(belux.get_gate_for_callsign_for_plugin)
-
     app.route('/get_gate/:gateid')
     .get(belux.get_gate_for_id)
 

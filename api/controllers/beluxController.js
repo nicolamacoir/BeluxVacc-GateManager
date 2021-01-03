@@ -5,22 +5,12 @@ var db = new Datastore();
 var f = require('./helpFunctions.js')
 var json = require('../data/gates.json');
 
-// db.insert(	{
-//     "gate": "310R",
-//     "apron": "apron-test",
-//     "latitude": 52.901488888888885,
-//     "longitude": 6.476963888888889,
-//     "occupied": true,
-//     "assigned_to": "BER64T"
-// }, function(err, res){ console.log("inserted dummy gate/callsign")});
-
-
+// INJECT DATA IN DATABASE
 db.insert(json, function(err, result){
-    if(err){
-        console.log(err)
-    }else{
-        console.log("succesfully imported!")
-    }
+     if(!err){
+         console.log("succesfully imported!")
+         db.update({}, {$set:{"occupied":false, "assigned_to": "none"}},{multi:true})
+     }
 });
 
 let active_clients = null;
@@ -303,7 +293,7 @@ function bookkeep_clients(){
     });
 }
 
-load_active_clients()
+setTimeout(load_active_clients, 2*1000);
 setInterval(load_active_clients, 90*1000);
 setInterval(bookkeep_clients, 120*1000);
 
@@ -341,13 +331,6 @@ exports.get_gate_for_callsign = async function(req, res){
     var gate = await get_gate_for_callsign(callsign)
     res.json(gate == null? [] : gate)
 }
-
-/* /POST/get_gate*/
-exports.get_gate_for_callsign_for_plugin = async function(req, res){
-    exports.get_gate_for_callsign(req, res);
-}
-
-
 
 /* /POST/request_gate */
 exports.request_gate = async function(req, res){
