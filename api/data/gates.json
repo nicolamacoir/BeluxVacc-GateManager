@@ -1286,5 +1286,85 @@
 		"longitude": 4.464836111111112,
 		"occupied": false,
 		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL1",
+		"apron": "apron-MIL",
+		"latitude": 50.9148102028943,
+		"longitude": 4.49671642402926,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL2",
+		"apron": "apron-MIL",
+		"latitude": 50.9145949648084,
+		"longitude": 4.49616261444872,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL3",
+		"apron": "apron-MIL",
+		"latitude": 50.9144179905254,
+		"longitude": 4.49564673703123,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL5",
+		"apron": "apron-MIL",
+		"latitude": 50.9139886918655,
+		"longitude": 4.49443353948016,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL7",
+		"apron": "apron-MIL",
+		"latitude": 50.9137384127494,
+		"longitude": 4.49378396702627,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL9",
+		"apron": "apron-MIL",
+		"latitude": 50.9135108851123,
+		"longitude": 4.49312537273273,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL11",
+		"apron": "apron-MIL",
+		"latitude": 50.9131013325449,
+		"longitude": 4.49119469900888,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL13",
+		"apron": "apron-MIL",
+		"latitude": 50.9130103203778,
+		"longitude": 4.4905721920739,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL14",
+		"apron": "apron-MIL",
+		"latitude": 50.9127031529995,
+		"longitude": 4.48992261962,
+		"occupied": false,
+		"assigned_to": "none"
+	},
+	{
+		"gate": "MIL15",
+		"apron": "apron-MIL",
+		"latitude": 50.9125268152553,
+		"longitude": 4.48943544027958,
+		"occupied": false,
+		"assigned_to": "none"
 	}
 ]
