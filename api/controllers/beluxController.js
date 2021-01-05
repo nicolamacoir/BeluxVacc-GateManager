@@ -222,7 +222,7 @@ async function process_clients(clients){
                         var other_callsign = gate.assigned_to;
                         var other_apron = gate.apron;
                         clear_gate(gate["gate"]);
-                        request_gate_on_apron(other_callsign, AC_code, other_apron);
+                        request_gate_on_apron(other_callsign, AC_code, [other_apron]);
                     }
                     var result = set_gate_to_callsign(gate["gate"], callsign); 
                     monitored_clients[callsign] = "AUTO-DEP"
