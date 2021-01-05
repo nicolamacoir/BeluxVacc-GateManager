@@ -5,10 +5,12 @@ var db = new Datastore();
 var f = require('./helpFunctions.js')
 var json = require('../data/gates.json');
 
+var DEBUG = false;
+
 // INJECT DATA IN DATABASE
 db.insert(json, function(err, result){
      if(!err){
-         console.log("succesfully imported!")
+        if (DEBUG) console.log("succesfully imported!")
          db.update({}, {$set:{"occupied":false, "assigned_to": "none"}},{multi:true})
      }
 });
@@ -75,14 +77,14 @@ async function set_gate_to_callsign(gate_id, callsign){
     /* Check if gate is not occupied */
     var cur_gate = await get_gate_for_gateid(gate_id);
     if (cur_gate.assigned_to != "none"){ 
-        console.log("ERR: gate " + gate_id + " already assigned to " + cur_gate.assigned_to);
+        if (DEBUG) console.log("ERR: gate " + gate_id + " already assigned to " + cur_gate.assigned_to);
         return "ERR: gate already occupied"
     }
 
     /* Check if already has a reservation, if yes, return error*/
     var curr_reservation = await get_gate_for_callsign(callsign);
     if (curr_reservation != null){ 
-        console.log("ERR: "+ callsign +" already assigned to gate: " + gate_id)
+        if (DEBUG) console.log("ERR: "+ callsign +" already assigned to gate: " + gate_id)
         return "ERR: already assigned to a gate"
     }
     
@@ -151,7 +153,7 @@ async function request_gate_on_apron(callsign, ac, apron){
 async function load_active_clients(){
     var intresting_clients = await fetch('https://data.vatsim.net/vatsim-data.json')
     .then(res => {
-        if(!res.ok){ console.error("failed vatsim json fetch"); throw res}
+        if(!res.ok){ if (DEBUG) console.error("failed vatsim json fetch"); throw res}
         return res.json()
     })
     .then((out) => {
@@ -206,7 +208,7 @@ async function process_clients(clients){
                     if(gate!=null){
                         var result = await clear_gate(gate["gate"]); 
                         delete monitored_clients[callsign]
-                        console.log("deleted " + callsign)
+                        if (DEBUG) console.log("deleted " + callsign)
                     }
                 }
             }else{
@@ -236,7 +238,7 @@ async function process_clients(clients){
                     if(gate!=null){
                         var result = await clear_gate(gate["gate"]); 
                         delete monitored_clients[callsign]
-                        console.log("deleted " + callsign)
+                        if (DEBUG) console.log("deleted " + callsign)
                     }
                 }
             }else{
@@ -285,7 +287,7 @@ function bookkeep_clients(){
                 found = true
         }
         if (!found){
-            console.log("cleaning up " + key)
+            if (DEBUG) console.log("cleaning up " + key)
             var gate = await get_gate_for_callsign(key);
             var result = await clear_gate(gate["gate"]);
             delete monitored_clients[key]
