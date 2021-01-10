@@ -20,6 +20,7 @@ let monitored_clients = {}
 let last_updated = Date.now()
 
 const location_brussels = {"latitude": 50.902, "longitude": 4.485}
+const location_charleroi = {"latitude": 50.4647, "longitude": 4.4611}
 
 async function get_all_gates(){
     var gates = await new Promise((resolve, reject) => {
@@ -243,7 +244,7 @@ async function process_clients(clients){
                 }
             }else{
                 var location_client = {"latitude": lat, "longitude": long} 
-                arr_distance = parseInt(f.worldDistance(location_client, location_brussels))
+                arr_distance = parseInt(f.worldDistance(location_client, location_charleroi))
                 if(parseInt(ground_speed) < 50)
                     /* not yet departed from origin*/
                     continue
@@ -269,7 +270,7 @@ async function process_clients(clients){
              "status"   : status,
              "distance" : arr_distance,
              "eta"      : ETA,
-             "eta_till_gate": (ETA_till_gate > 0 ? ETA_till_gate : ''),
+             "eta_till_gate": ((ETA_till_gate +1) > 0 ? (ETA_till_gate +1) : ''),
              "reservation": (arr_distance < 150 ?gate : '')
             }
         );

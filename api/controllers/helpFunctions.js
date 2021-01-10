@@ -107,13 +107,13 @@ function get_valid_aprons (callsign, origin, actype){
             return ["apron-9"];
         }
     }
-    for(i=0;i<low_costs_icaos.length;i++){
-        if(callsign.startsWith(low_costs_icaos[i])){
-            return ["apron-1-north-low-cost"];
-        }
-    }
     for(i=0;i<shengen_prefixes.length;i++){
         if (origin.startsWith(shengen_prefixes[i])){
+            for(i=0;i<low_costs_icaos.length;i++){
+                if(callsign.startsWith(low_costs_icaos[i])){
+                    return ["apron-1-north-low-cost"];
+                }
+            }
             return ["apron-1-south", "apron-1-north"];
         }
     }
