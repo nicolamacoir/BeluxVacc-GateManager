@@ -270,7 +270,7 @@ async function process_clients(clients){
              "status"   : status,
              "distance" : arr_distance,
              "eta"      : ETA,
-             "eta_till_gate": ((ETA_till_gate +1) > 0 ? (ETA_till_gate +1) : ''),
+             "eta_till_gate": ((ETA_till_gate) > 0 ? (ETA_till_gate +1) : ''),
              "reservation": (arr_distance < 150 ?gate : '')
             }
         );
