@@ -15,7 +15,9 @@ module.exports = function(app) {
 
     app.route('/request_gate')
     .post(belux.request_gate)
-    .put(belux.change_gate)
+
+    app.route('/change_gate')
+    .post(belux.change_gate)
 
     app.route('/toggle_reservation/:gateid')
     .post(belux.toggle_reservation)
