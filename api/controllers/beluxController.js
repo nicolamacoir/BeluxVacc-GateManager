@@ -274,7 +274,8 @@ async function process_clients(clients){
                 }
             }else{
                 var location_client = {"latitude": lat, "longitude": long} 
-                arr_distance = parseInt(f.worldDistance(location_client, location_coordinates[client["planned_destairport"]]))
+                var dest_airport = (client["planned_destairport"]=="EBBR"?"EBCI": client["planned_destairport"]) //Hack for south arrivals in brussels
+                arr_distance = parseInt(f.worldDistance(location_client, location_coordinates[dest_airport]))
                 if(parseInt(ground_speed) < 50)
                     /* not yet departed from origin*/
                     continue
@@ -440,4 +441,33 @@ exports.get_active_clients = function(req, res){
 exports.force_reload_clients= async function(req, res){
     await load_active_clients()
     res.json({"status": "OK"})
+}
+
+
+exports.get_available_airports = function(req, res){
+    res.json([
+        {  "icao"      : "EBBR",
+           "active"    : true,
+        },
+        {
+            "icao"     : "ELLX",
+            "active"   : true,
+        },
+        {
+            "icao"     : "EBCI",
+            "active"   : false,
+        },
+        {
+            "icao"     : "EBOS",
+            "active"   : false,
+        },
+        {
+            "icao"     : "EBAW",
+            "active"   : false,
+        },
+        {
+            "icao"     : "EBLG",
+            "active"   : true,
+        },
+    ])
 }

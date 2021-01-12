@@ -30,4 +30,7 @@ module.exports = function(app) {
 
     app.route('/force_get_clients')
     .get(belux.force_reload_clients)
+
+    app.route("/available_airports")
+    .get(belux.get_available_airports)
 };
