@@ -5,12 +5,15 @@ module.exports = function(app) {
 
     app.route('/gates')
     .get(belux.list_all_gates)
+
+    app.route('/gates/:airport')
+    .get(belux.list_all_gates_for_airport)
     .post(belux.list_all_valid_gates)
 
     app.route('/get_gate/')
     .post(belux.get_gate_for_callsign)
 
-    app.route('/get_gate/:gateid')
+    app.route('/get_gate/:airport/:gateid')
     .get(belux.get_gate_for_id)
 
     app.route('/request_gate')
@@ -19,12 +22,18 @@ module.exports = function(app) {
     app.route('/change_gate')
     .post(belux.change_gate)
 
-    app.route('/toggle_reservation/:gateid')
+    app.route('/toggle_reservation/:airport/:gateid')
     .post(belux.toggle_reservation)
 
-    app.route('/get_clients')
-    .get(belux.get_active_clients)
+    app.route('/get_pilots/:airport')
+    .get(belux.get_active_pilots)
+
+    app.route('/get_controllers')
+    .get(belux.get_active_controllers)
 
     app.route('/force_get_clients')
     .get(belux.force_reload_clients)
+
+    app.route("/available_airports")
+    .get(belux.get_available_airports)
 };

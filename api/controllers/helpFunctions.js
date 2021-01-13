@@ -1,22 +1,28 @@
 var fs = require('fs');
 var gates_json = JSON.parse(fs.readFileSync('api/data/gates.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync('api/data/data.json', 'utf8'));
 
-var shengen_prefixes = ["LF", "EL", "EH", "EB", "ED", "LP", "LO", "LK", "EK", "EE", "EF", "LG", "LH", "BI", "LI", "EV", "EY", "LM", "EN", "EP", "LP", "LZ", "LJ", "LE", "ES", "LS"];
-var cargo_icaos = ['DHL','DHK','BCS','CLX','FDX','BOX','GEC','TAY','ABW','CTJ','MSX','LCO','QAC','SQC','CKS','PAC','UPS','ABD','MZN','NPT','NCA','MPH','ABR','AHK','GTI','CKK','DSR','NWA','EIA','RCF','AIC','MAS','SHQ','LTG']
-var low_costs_icaos = ['RYR','RYS','MAY','RUK','LDA','LDM','EZY','EZS','EJU','WZZ'];
-var GA_aircraft = {
-                'A' :      ['AEST'],
-                'B' :      ['B18T','B190','B350','B36T','BE10','BE17','BE18','BE20','BE23','BE24','BE30','BE35','BE36','BE40','BE50','BE55','BE58','BE60','BE65','BE70','BE76','BE77','BE80','BE88','BE95','BE99','BE9L','BE9T'],
-                'C' :      ['C02T','C06T','C07T','C10T','C120','C140','C150','C152','C162','C170','C172','C175','C177','C180','C182','C185','C188','C190','C195','C25C','C205','C206','C207','C208','C210','C21T','C25A','C25B','C303','C310','C320','C335','C336','C337','C340','C402','C404','C411','C414','C421','C425','C441','C500','C501','C510','C525','C526','C550','C551','C560','C56X','C650','C680','C72R','C750','C77R','C82R','COL3','COL4'],
-                'E' :      ['EVOT','EVOP'],
-                'J' :      ['J2','J3','J4','J5'],
-                'L' :      ['LNC2','LNCE','LNT4','LEG2','LNP4','LJ23','LJ25','LJ31','LJ35','LJ40','LJ45','LJ55','LJ60'],
-                'P' :      ['P28A','P28B','P28R','P28S','P28T','P28U','P32R','P32T','P46T','PA11','PA12','PA14','PA15','PA16','PA17','PA18','PA20','PA22','PA23','PA24','PA25','PA27','PA30','PA31','PA32','PA34','PA36','PA38','PA44','PA46','PA47','PAT4','PAY1','PAY2','PAY3','PAY4','PILL'],
-                'T' :      ['TGRS','TBM9'],
-                'S' :      ['SNGY','SR22','S108']
+const airport_zones = {
+    "EBBR" : [50.915, 50.886, 4.524, 4.45, 200],
+    "EBBR_GA": [50.897989, 50.897117, 4.467701,  4.465336, 200],
+    "ELLX": [49.6386, 49.6177, 6.237, 6.1868, 1400]
 }
-var MIL_icaos = ['BAF','AYB','BYN','DAF','DAR','DNY','GAF','GAM','GNY','PLF','PNY','FAG','ASY','ASF','CFC','HRZ','EEF','FNF','RFR','RRR','KRF','KRH','RRF','NVY','NOH','KIN','LCS','CAP','RCH','AIO','PAT','CNV','CGX','AAF','RFF','CHD','TTF','HKY','AAC','AKG','CFC','CWL','FAF','MJN','NATO']
-var MIL_aircraft = ['A10','A4','A400','A6','A7','AJET','B1','B17','B29','B52','C130','C141','C17','C30J','C5M','CAT','CORS','DC3','E314','E3CF','E3TF','EUFI','F111','F14','F15','F16','F18','F22','F4','F9F','FURY','H47','HAR','HURI','K35E','K35R','LANC','ME09','MG23','P2','P3','P40','P51','P8','S2P','S37','SPIT','SSAB','SU25','T2','T28','T6','U16','V22','VF35','Y130','ZERO']
+
+function binarySearch(items, value){
+    var startIndex  = 0,
+        stopIndex   = items.length - 1,
+        middle      = Math.floor((stopIndex + startIndex)/2);
+ 
+    while(items[middle] != value && startIndex < stopIndex){
+        if (value < items[middle]){
+            stopIndex = middle - 1;
+        } else if (value > items[middle]){
+            startIndex = middle + 1;
+        }
+        middle = Math.floor((stopIndex + startIndex)/2);
+    }
+    return (items[middle] != value) ? false : true;
+}
 
 function vectorDistance(dx, dy) {
     return Math.sqrt(dx * dx + dy * dy);
@@ -57,16 +63,8 @@ function get_gate_for_position  (lat, long){
     return closestLocation({"latitude": lat, "longitude":long},gates_json)
 }
 
-function is_on_brussels_ground  (lat, long, altitude){
-    if(lat < 50.915 && lat > 50.886 && long < 4.524 && long > 4.45 && altitude < 200){
-        return true
-    }else{
-        return false
-    }
-}
-
-function is_on_GA_parking (lat, long, altitude){
-    if(lat < 50.897989 && lat > 50.897117 && long < 4.467701 && long > 4.465336  && altitude < 200){
+function is_on_zone(zone, lat, long, altitude){
+    if(lat < zone[0] && lat > zone[1] && long < zone[2] && long > zone[3] && altitude < zone[4]){
         return true
     }else{
         return false
@@ -74,50 +72,128 @@ function is_on_GA_parking (lat, long, altitude){
 }
 
 function detect_GA(actype){
-    var first_letter = actype.charAt(0);
-    if(first_letter in GA_aircraft){
-        if (GA_aircraft[first_letter].includes(actype))
-            return true;
+    if(binarySearch(data["ac_GA"], actype)){
+        return true;
     }
     return false;
 }
 
 function detect_MIL(actype, callsign){
-    if (MIL_aircraft.includes(actype))
+    if(binarySearch(data["ac_MIL"], actype)){
         return true;
-
-    for(i=0;i<MIL_icaos.length;i++){
-        if(callsign.startsWith(MIL_icaos[i])){
+    }
+    for(i=0;i<data["cs_MIL"].length;i++){
+        if(callsign.startsWith(data["cs_MIL"][i])){
             return true;
         }
     }
     return false;
 }
 
-function get_valid_aprons (callsign, origin, actype){
-    var i;
-    if(detect_GA(actype)){
-        return ["apron-GA"];
+function detect_turboprop(actype){
+    if(binarySearch(data["ac_turboprops"], actype)){
+        return true
     }
-    if(detect_MIL(actype, callsign)){
-        return ["apron-MIL"]
+    return false;
+}
+
+function detect_private_jet(actype){
+    if(binarySearch(data["ac_privatejets"], actype)){
+        return true
     }
-    for(i=0;i<cargo_icaos.length;i++){
-        if(callsign.startsWith(cargo_icaos[i])){
-            return ["apron-9"];
+    return false;
+}
+
+function detect_heavy(actype){
+    if(binarySearch(data["ac_heavy"], actype)){
+        return true
+    }
+    return false;
+}
+
+function detect_cargo(callsign){
+    for(i=0;i<data["cs_cargo"].length;i++){
+        if(callsign.startsWith(data["cs_cargo"][i])){
+            return true
         }
     }
-    for(i=0;i<shengen_prefixes.length;i++){
-        if (origin.startsWith(shengen_prefixes[i])){
-            for(i=0;i<low_costs_icaos.length;i++){
-                if(callsign.startsWith(low_costs_icaos[i])){
-                    return ["apron-1-north-low-cost"];
-                }
+    return false;
+}
+
+function detect_shengen(origin){
+    for(i=0;i<data["ap_shengen"].length;i++){
+        if (origin.startsWith(data["ap_shengen"][i])){
+            return true;
+        }
+    }
+    return false;
+}
+
+function detect_lowcost(callsign){
+    for(i=0;i<data["cs_low_cost"].length;i++){
+        if(callsign.startsWith(data["cs_low_cost"][i])){
+            return true;
+        }
+    }
+    return false;
+}
+
+function get_valid_aprons (airport, callsign, origin, actype){
+    switch(airport)
+    {
+        case "EBBR":
+            if(detect_GA(actype) || detect_private_jet(actype)){
+                return [["apron-GA"], ["apron-60"]]
             }
-            return ["apron-1-south", "apron-1-north"];
-        }
+            if(detect_MIL(actype, callsign)){
+                return [["apron-MIL"], ["apron-60"]]
+            }
+            if(detect_cargo(callsign)){
+                return [["apron-9"], ["apron-51c"]]
+            }
+            if(detect_shengen(origin)){
+                if(detect_lowcost(callsign)){
+                    return [["apron-1-north-low-cost"], ["apron-1-south", "apron-1-north"]];
+                }
+                return [["apron-1-south", "apron-1-north"], ["apron-2-north", "apron-2-south"]];
+            }
+            return [["apron-2-north", "apron-2-south"], ["apron-1-south", "apron-1-north"]];
+        
+        case "ELLX":
+            if(detect_cargo(callsign)){
+                return [["apron-P7-Z", "apron-P10-Z"], ["apron-P1-V-heavy"]]
+            }
+
+            if(detect_private_jet(actype)){
+                return [["apron-P2"], ["apron-P1-V"]]
+            }
+
+            if(detect_GA(actype)){
+                return [["apron-P5"],["apron-P2"]]
+            }
+
+            if(detect_heavy(actype)){
+                return [["apron-P1-V-heavy"],["apron-P7-Z", "apron-P10-Z"]]
+            }
+
+            if(detect_turboprop(actype)){
+                if(detect_shengen(origin)){
+                    return [["apron-P1-B"], ["apron-P1-V"]]
+                }
+                return [["apron-P1-V-nonshengen"], ["apron-P1-V"]]
+            }
+
+            if(detect_lowcost(callsign)){
+                return [["apron-P1-V"],["apron-P1-V-nonshengen"]]
+            }
+
+            if(!detect_shengen(origin)){
+                return [["apron-P1-A-nonshengen"], ["apron-P1-A", "apron-P1-V"]]
+            }
+
+            return [["apron-P1-A"], ["apron-P1-V"]]
     }
-    return ["apron-2-north", "apron-2-south"];
+
 }
 
 module.exports = {
@@ -126,8 +202,9 @@ module.exports = {
     worldDistance: worldDistance,
     closestLocation: closestLocation,
     get_gate_for_position: get_gate_for_position,
-    is_on_brussels_ground: is_on_brussels_ground,
+    is_on_zone: is_on_zone,
     get_valid_aprons: get_valid_aprons,
     detect_GA: detect_GA,
     detect_MIL: detect_MIL,
+    airport_zones: airport_zones,
 }
