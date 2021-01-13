@@ -212,7 +212,8 @@ async function load_active_clients(){
         }
         for(i=0;i< out.controllers.length;i++){
             var client = out.controllers[i]
-            if (client.callsign.startsWith("EB") || client.callsign.startsWith("EL")){
+            var belux_positions = ["EBBU", "EBBR", "EBOS", "EBAW", "EBCI", "EBLG" , "ELLX"]
+            if (belux_positions.includes(client.callsign.substring(0,4))){
                 controllers_of_interest.push(client)
             }
         }
