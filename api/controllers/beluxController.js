@@ -141,6 +141,15 @@ async function set_gate_to_callsign(airport, gate_id, callsign){
     }
 }
 
+
+async function change_gate_for(callsign, gateid){
+    var old_gate = await get_gate_for_callsign(callsign);
+    var result = await clear_gate(old_gate["airport"], old_gate["gate"]);
+    var new_gate = await set_gate_to_callsign(old_gate["airport"],gateid, callsign);
+    return new_gate
+}
+
+
 async function clear_gate(airport, gate_id){
     var gate = await new Promise((resolve, reject) => {
         db.findOne({"airport":airport, "gate": gate_id}, (err, result) => {
@@ -258,7 +267,14 @@ async function process_clients(clients){
                     var result = set_gate_to_callsign(gate["airport"],gate["gate"], callsign); 
                     monitored_clients[callsign] = "AUTO-DEP"
                     load_active_clients();
-                }
+                }/*else{
+                    if (cur_gate["gate"] != closestGate["gate"]){
+                        var new_gate = change_gate_for(callsign, closestGate["gate"])
+                        if((typeof new_gate === 'string' && new_gate.startsWith("ERR"))){
+                            //OOPS
+                        }
+                    }
+                }*/
                 status = "at_gate"
             }
         }else{
@@ -393,9 +409,8 @@ exports.change_gate = async function(req, res){
     callsign = req.body.callsign;
     requested_gateid = req.body.gate_id;
 
-    var old_gate = await get_gate_for_callsign(callsign);
-    var result = await clear_gate(old_gate["airport"], old_gate["gate"]);
-    var new_gate = await set_gate_to_callsign(old_gate["airport"],requested_gateid, callsign);
+    new_gate = change_gate_for(callsign, requested_gateid)
+
     if(typeof new_gate === 'string' && new_gate.startsWith("ERR")){
         res.status(500).send(
         {

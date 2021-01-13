@@ -97,6 +97,13 @@ function detect_turboprop(actype){
     return false;
 }
 
+function detect_private_jet(actype){
+    if(binarySearch(data["ac_privatejets"], actype)){
+        return true
+    }
+    return false;
+}
+
 function detect_heavy(actype){
     if(binarySearch(data["ac_heavy"], actype)){
         return true
@@ -135,7 +142,7 @@ function get_valid_aprons (airport, callsign, origin, actype){
     switch(airport)
     {
         case "EBBR":
-            if(detect_GA(actype)){
+            if(detect_GA(actype) || detect_private_jet(actype)){
                 return [["apron-GA"], ["apron-60"]]
             }
             if(detect_MIL(actype, callsign)){
@@ -153,12 +160,16 @@ function get_valid_aprons (airport, callsign, origin, actype){
             return [["apron-2-north", "apron-2-south"], ["apron-1-south", "apron-1-north"]];
         
         case "ELLX":
-            if(detect_GA(actype)){
-                return [["apron-P5"],["apron-P2"]]
-            }
-
             if(detect_cargo(callsign)){
                 return [["apron-P7-Z", "apron-P10-Z"], ["apron-P1-V-heavy"]]
+            }
+
+            if(detect_private_jet(actype)){
+                return [["apron-P2"], ["apron-P1-V"]]
+            }
+
+            if(detect_GA(actype)){
+                return [["apron-P5"],["apron-P2"]]
             }
 
             if(detect_heavy(actype)){
