@@ -471,7 +471,7 @@ exports.toggle_reservation = async function(req, res){
 exports.get_active_pilots = function(req, res){
     airport = req.params["airport"].toUpperCase();
     filtered_clients = pilots_of_interest.filter(function(el){
-        return el.dest_airport == airport || el.dep_airport == airport
+        return el.arr_airport == airport || el.dep_airport == airport
     });
     res.json({"updated": last_updated, "clients": filtered_clients});
 }
