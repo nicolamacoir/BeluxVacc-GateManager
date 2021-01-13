@@ -25,8 +25,11 @@ module.exports = function(app) {
     app.route('/toggle_reservation/:airport/:gateid')
     .post(belux.toggle_reservation)
 
-    app.route('/get_clients/:airport')
-    .get(belux.get_active_clients)
+    app.route('/get_pilots/:airport')
+    .get(belux.get_active_pilots)
+
+    app.route('/get_controllers')
+    .get(belux.get_active_controllers)
 
     app.route('/force_get_clients')
     .get(belux.force_reload_clients)

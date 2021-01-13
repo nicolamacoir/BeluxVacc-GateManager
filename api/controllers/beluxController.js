@@ -16,7 +16,9 @@ db.insert(json, function(err, result){
      }
 });
 
-let active_clients = null;
+let pilots_of_interest = null;
+let controllers_of_interest = null;
+
 let monitored_clients = {}
 let last_updated = Date.now()
 
@@ -187,25 +189,35 @@ async function request_gate_on_apron(airport, callsign, ac, apron){
 }
 
 async function load_active_clients(){
-    var intresting_clients = await fetch('https://data.vatsim.net/vatsim-data.json')
+    var intresting_clients = await fetch('https://data.vatsim.net/v3/vatsim-data.json')
     .then(res => {
         if(!res.ok){ if (DEBUG) console.error("failed vatsim json fetch"); throw res}
         return res.json()
     })
     .then((out) => {
-        clients = []
+        pilots_of_interest = []
+        controllers_of_interest = []
         var i;
-        for(i=0; i< out["clients"].length;i++){
-            var client =  out["clients"][i]
-            var location_client = {"latitude": client["latitude"], "longitude": client["longitude"]} 
-            if (airports_of_interest.includes(client["planned_depairport"]) && f.worldDistance(location_client, location_coordinates[client["planned_depairport"]]) < 300){
-                clients.push(client)
-            }
-            else if (airports_of_interest.includes(client["planned_destairport"])  && f.worldDistance(location_client, location_coordinates[client["planned_destairport"]]) < 300){
-                clients.push(client)
+        for(i=0; i< out.pilots.length;i++){
+            var client =  out.pilots[i]
+            var location_client = {"latitude": client.latitude, "longitude": client.longitude} 
+            if(client.flight_plan != null){
+                if (airports_of_interest.includes(client.flight_plan.departure) && f.worldDistance(location_client, location_coordinates[client.flight_plan.departure]) < 300){
+                    pilots_of_interest.push(client)
+                }
+                else if (airports_of_interest.includes(client.flight_plan.arrival)  && f.worldDistance(location_client, location_coordinates[client.flight_plan.arrival]) < 300){
+                    pilots_of_interest.push(client)
+                }
             }
         }
-        return clients
+        for(i=0;i< out.controllers.length;i++){
+            var client = out.controllers[i]
+            if (client.callsign.startsWith("EB") || client.callsign.startsWith("EL")){
+                controllers_of_interest.push(client)
+            }
+        }
+
+        return { "pilots": pilots_of_interest, "controllers": controllers_of_interest}
     })
     .catch((err) => {
         return null;
@@ -217,25 +229,25 @@ async function load_active_clients(){
 }
 
 async function process_clients(clients){
-    var i, output_clients=[];
-    for (const [key, client] of Object.entries(clients)) {
-        var callsign = client["callsign"]
-        var lat = client["latitude"],
-            long = client["longitude"],
-            altitude = client["altitude"],
+    var i, output_pilots=[], output_controllers=[];
+    for (const [key, client] of Object.entries(clients.pilots)) {
+        var callsign = client.callsign
+        var lat = client.latitude,
+            long = client.longitude,
+            altitude = client.altitude,
             status = "UNKNOWN",
             arr_distance = '',
             ETA = '',
             ETA_till_gate = '',
-            AC_code = client["planned_aircraft"].split("/")[0];
-            ground_speed = client["groundspeed"]
+            AC_code = client.flight_plan.aircraft.split("/")[0];
+            ground_speed = client.groundspeed
         
         if (AC_code.length==1){
-            AC_code = client["planned_aircraft"].split("/")[1];
+            AC_code = client.flight_plan.aircraft.split("/")[1];
         }
 
-        var on_dep_ground = (client["planned_depairport"] in f.airport_zones ?  f.is_on_zone(f.airport_zones[client["planned_depairport"]], lat, long, altitude) : false);
-        var on_arr_ground = (client["planned_destairport"] in f.airport_zones ?  f.is_on_zone(f.airport_zones[client["planned_destairport"]], lat, long, altitude) : false);
+        var on_dep_ground = (client.flight_plan.departure in f.airport_zones ?  f.is_on_zone(f.airport_zones[client.flight_plan.departure], lat, long, altitude) : false);
+        var on_arr_ground = (client.flight_plan.arrival in f.airport_zones ?  f.is_on_zone(f.airport_zones[client.flight_plan.arrival], lat, long, altitude) : false);
 
         if (on_dep_ground || on_arr_ground){
             var closestGate = f.get_gate_for_position(lat, long);
@@ -245,7 +257,7 @@ async function process_clients(clients){
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
                     var gate = await get_gate_for_callsign(callsign);
                     if(gate!=null){
-                        var result = await clear_gate(gate["airport"], gate["gate"]); 
+                        var result = await clear_gate(gate.airport, gate.gate); 
                         delete monitored_clients[callsign]
                         if (DEBUG) console.log("deleted " + callsign)
                     }
@@ -254,17 +266,17 @@ async function process_clients(clients){
                 // AC is at gate
                 var cur_gate = await get_gate_for_callsign(callsign);
                 if (cur_gate == null){
-                    let gate = await get_gate_for_gateid(closestGate["airport"], closestGate["gate"]);
+                    let gate = await get_gate_for_gateid(closestGate.airport, closestGate.gate);
                     if(gate.occupied == true){
                         /* Gate was already assigned => double booking
                            Make new reservation for that client */
                         var other_callsign = gate.assigned_to;
                         var other_apron = gate.apron;
                         var other_airport = gate.airport
-                        clear_gate(gate["gate"]);
+                        clear_gate(gate.gate);
                         request_gate_on_apron(other_airport, other_callsign, AC_code, [other_apron]);
                     }
-                    var result = set_gate_to_callsign(gate["airport"],gate["gate"], callsign); 
+                    var result = set_gate_to_callsign(gate.airport,gate.gate, callsign); 
                     monitored_clients[callsign] = "AUTO-DEP"
                     load_active_clients();
                 }/*else{
@@ -278,19 +290,19 @@ async function process_clients(clients){
                 status = "at_gate"
             }
         }else{
-            if(airports_of_interest.includes(client["planned_depairport"])){
+            if(airports_of_interest.includes(client.flight_plan.departure)){
                 status = "departed"
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
                     var gate = await get_gate_for_callsign(callsign)
                     if(gate!=null){
-                        var result = await clear_gate(gate["airport"], gate["gate"]); 
+                        var result = await clear_gate(gate.airport, gate.gate); 
                         delete monitored_clients[callsign]
                         if (DEBUG) console.log("deleted " + callsign)
                     }
                 }
             }else{
                 var location_client = {"latitude": lat, "longitude": long} 
-                var dest_airport = (client["planned_destairport"]=="EBBR"?"EBCI": client["planned_destairport"]) //Hack for south arrivals in brussels
+                var dest_airport = (client.flight_plan.arrival=="EBBR"?"EBCI": client.flight_plan.arrival) //Hack for south arrivals in brussels
                 arr_distance = parseInt(f.worldDistance(location_client, location_coordinates[dest_airport]))
                 if(parseInt(ground_speed) < 50)
                     /* not yet departed from origin*/
@@ -298,7 +310,7 @@ async function process_clients(clients){
                 if (arr_distance < 150){
                     var cur_gate = await get_gate_for_callsign(callsign);
                     if (cur_gate == null){
-                        var result = await request_gate_for(client["planned_destairport"], callsign, client["planned_depairport"], AC_code)
+                        var result = await request_gate_for(client.flight_plan.arrival, callsign, client.flight_plan.departure, AC_code)
                         monitored_clients[callsign] = "AUTO_ARR"
                     }
                 }
@@ -308,12 +320,12 @@ async function process_clients(clients){
             }
         }
         var result = await get_gate_for_callsign(callsign);
-        var gate = (result== null ? "": (result["gate"])) 
-        output_clients.push(
-            {"type"     : (airports_of_interest.includes(client["planned_depairport"]) ? "D":"A"),
+        var gate = (result== null ? "": (result.gate)) 
+        output_pilots.push(
+            {"type"     : (airports_of_interest.includes(client.flight_plan.departure) ? "D":"A"),
              "callsign" : callsign, 
-             "dest_airport"  : client["planned_destairport"],
-             "dep_airport"   : client["planned_depairport"],
+             "arr_airport"  : client.flight_plan.arrival,
+             "dep_airport"   : client.flight_plan.departure,
              "ac"       : AC_code,
              "status"   : status,
              "distance" : arr_distance,
@@ -322,17 +334,28 @@ async function process_clients(clients){
              "reservation": (arr_distance < 150 ?gate : '')
             }
         );
-
     }
-    active_clients = output_clients
+    for (const [key, client] of Object.entries(clients.controllers)) {
+        output_controllers.push(
+            {
+                "callsign"      : client.callsign,
+                "logon_time"    : client.logon_time,
+                "name"          : client.name,
+                "frequency"     : client.frequency     
+            }
+        )
+    }
+
+    pilots_of_interest = output_pilots
+    controllers_of_interest = output_controllers
     return {"status": "ok"}
 }
 
 function bookkeep_clients(){
     Object.keys(monitored_clients).forEach(async function(key){
         var i, found=false;
-        for (i=0;i<active_clients.length;i++){
-            if (active_clients[i]["callsign"] == key)
+        for (i=0;i<pilots_of_interest.length;i++){
+            if (pilots_of_interest[i]["callsign"] == key)
                 found = true
         }
         if (!found){
@@ -443,13 +466,18 @@ exports.toggle_reservation = async function(req, res){
     load_active_clients();
 }
 
-/* /GET/get_clients */
-exports.get_active_clients = function(req, res){
+/* /GET/get_pilots */
+exports.get_active_pilots = function(req, res){
     airport = req.params["airport"].toUpperCase();
-    filtered_clients = active_clients.filter(function(el){
+    filtered_clients = pilots_of_interest.filter(function(el){
         return el.dest_airport == airport || el.dep_airport == airport
     });
     res.json({"updated": last_updated, "clients": filtered_clients});
+}
+
+/* /GET/get_controllers */
+exports.get_active_controllers = function(req, res){
+    res.json({"updated": last_updated, "clients": controllers_of_interest});
 }
 
 /* /GET/force_get_clients */
