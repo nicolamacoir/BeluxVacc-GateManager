@@ -1909,5 +1909,19 @@
 		"apron": "apron-P5",
 		"latitude": 49.6240571763725,
 		"longitude": 6.19728823969878
+	},
+	{
+		"airport": "ELLX",
+		"gate": "MNT1",
+		"apron": "apron-P8",
+		"latitude": 49.6174113838335,
+		"longitude": 6.19982078630521
+	},
+	{
+		"airport": "ELLX",
+		"gate": "MNT2",
+		"apron": "apron-P8",
+		"latitude": 49.6177936922197,
+		"longitude": 6.20099022935496
 	}
 ]
