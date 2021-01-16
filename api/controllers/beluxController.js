@@ -433,7 +433,7 @@ exports.change_gate = async function(req, res){
     callsign = req.body.callsign;
     requested_gateid = req.body.gate_id;
 
-    new_gate = change_gate_for(callsign, requested_gateid)
+    new_gate = await change_gate_for(callsign, requested_gateid)
 
     if(typeof new_gate === 'string' && new_gate.startsWith("ERR")){
         res.status(500).send(
