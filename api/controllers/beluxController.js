@@ -189,14 +189,14 @@ async function request_gate_on_apron(airport, callsign, ac, apron){
 }
 
 async function load_active_clients(){
-    var intresting_clients = await fetch('https://data.vatsim.net/v3/vatsim-data.json')
-    //var intresting_clients = await fetch('https://api.beluxvacc.org/belux-active-runways/vatsim-clients', {
-    //     headers: {
-    //       "Authorization": 'Basic YmVsdXhfY2xpZW50XzIwMjE6T2ZlZEN1enRRSW1PemN3Z2h3cjU1QQ=='
-    //     }
-    // })
+    // var intresting_clients = await fetch('https://data.vatsim.net/v3/vatsim-data.json')
+    var intresting_clients = await fetch('https://api.beluxvacc.org/belux-active-runways/vatsim-clients', {
+        headers: {
+          "Authorization": 'Basic YmVsdXhfY2xpZW50XzIwMjE6T2ZlZEN1enRRSW1PemN3Z2h3cjU1QQ=='
+        }
+    })
     .then(res => {
-        if(!res.ok){ if (DEBUG) console.error("failed vatsim json fetch"); throw res}
+        if(!res.ok){ console.error("failed vatsim json fetch"); throw res}
         return res.json()
     })
     .then((out) => {
@@ -280,7 +280,7 @@ async function process_clients(clients){
                         var other_apron = gate.apron;
                         var other_airport = gate.airport
                         clear_gate(gate.gate);
-                        request_gate_on_apron(other_airport, other_callsign, AC_code, [other_apron]);
+                        request_gate_on_apron(other_airport, other_callsign, AC_code, [[other_apron], [other_apron]]);
                     }
                     var result = set_gate_to_callsign(gate.airport,gate.gate, callsign); 
                     monitored_clients[callsign] = "AUTO-DEP"
