@@ -189,7 +189,8 @@ async function request_gate_on_apron(airport, callsign, ac, apron){
 }
 
 async function load_active_clients(){
-    var intresting_clients = await fetch('https://data.vatsim.net/v3/vatsim-data.json')
+    // var intresting_clients = await fetch('https://data.vatsim.net/v3/vatsim-data.json')
+    var intresting_clients = await fetch('https://api.beluxvacc.org/belux-active-runways/vatsim-clients')
     .then(res => {
         if(!res.ok){ if (DEBUG) console.error("failed vatsim json fetch"); throw res}
         return res.json()
