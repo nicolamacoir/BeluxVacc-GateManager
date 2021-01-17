@@ -1,8 +1,7 @@
 const fetch = require("node-fetch");
 var _ = require('underscore');
 var Datastore = require('nedb')
-var f = require('./helpFunctions.js')
-
+var f = require('./helpFunctions.js');
 
 var DEBUG = false;
 
@@ -30,146 +29,132 @@ const location_coordinates = {
 }
 
 async function get_all_gates(){
-    var gates = await new Promise((resolve, reject) => {
-        db.find({}, {"_id": 0, "__v":0}).sort({occupied : -1, apron:1 }).exec((err, count) => {
+    var gate_list = await new Promise((resolve, reject) => {
+        db.find({}, {"_id": 0, "__v":0}).sort({occupied : -1, apron:1 }).exec((err, result) => {
             if (err) reject(err);
-            resolve(count);
+            resolve(result);
         });
     });
-    return gates
+    return gate_list
 }
 
 async function get_all_gates_for_airport(airport){
-    var gates = await new Promise((resolve, reject) => {
-        db.find({"airport":airport}, {"_id": 0, "__v":0}).sort({occupied : -1, apron:1 }).exec((err, count) => {
+    var gate_list = await new Promise((resolve, reject) => {
+        db.find({"airport":airport}, {"_id": 0, "__v":0}).sort({occupied : -1, apron:1 }).exec((err, result) => {
             if (err) reject(err);
-            resolve(count);
+            resolve(result);
         });
     });
-    return gates
+    return gate_list
 }
 
-async function get_all_possible_gates_for(airport, ac, apron){
-    var aprons = apron[0], backup_aprons = apron[1]
+async function get_all_possible_gates_for(airport, ac, apron_input){
+    let [aprons, backup_aprons] = apron_input
 
     if(airport == "EBBR" && ac == "A388"){
         var super_gates = ["233R", "322", "328"]
-        var gates = await new Promise((resolve, reject) => {
+        var gate_list = await new Promise((resolve, reject) => {
             db.find({"airport":airport, "gate":{ $in: super_gates}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
                 if (err) reject(err);
                 resolve(result);
             });
         });
-        return (gates.length > 0 ? [gates[0]] : [])
+        return (gate_list.length > 0 ? [gate_list[0]] : [])
     }
     /* Find all gates on specific apron */
-    var gates = await new Promise((resolve, reject) => {
+    var gate_list = await new Promise((resolve, reject) => {
         db.find({"airport":airport, "apron": { $in: aprons}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
             if (err) reject(err);
             resolve(result);
         });
     });
-    /* When all gates are occupied, use backup apron*/
-    if(gates.length == 0){
-        gates = await new Promise((resolve, reject) => {
+    /* When all gates on apron are occupied, use backup apron*/
+    if(gate_list.length == 0){
+        gate_list = await new Promise((resolve, reject) => {
             db.find({"airport":airport, "apron": { $in: backup_aprons}, "occupied":false}, {"_id": 0, "__v":0}).sort({apron: 1}).exec((err, result) => {
                 if (err) reject(err);
                 resolve(result);
             });
         });
     }
-    return gates
+    return gate_list
 }
 
 async function get_gate_for_gateid(airport, gate_id){
-    var gate = await new Promise((resolve, reject) => {
+    var gate_obj = await new Promise((resolve, reject) => {
         db.findOne({"airport":airport, "gate": gate_id}, {"_id": 0, "__v":0}, (err, result) => {
             if (err) reject(err);
             resolve(result);
         });
     });
-    return gate
+    return gate_obj
 }
 
-async function get_gate_for_callsign(callsign,ac_type=null){
-    var gate = await new Promise((resolve, reject) => {
-        db.findOne({"assigned_to" : callsign},{"_id": 0, "__v":0, "apron":0, "latitude":0, "longitude":0, "occupied":0}, (err, result) => {
+async function get_gate_for_callsign(callsign){
+    var gate_obj = await new Promise((resolve, reject) => {
+        db.findOne({"assigned_to" : callsign},{"_id": 0, "__v":0, "apron":0, "latitude":0, "longitude":0}, (err, result) => {
             if (err) reject(err);
             resolve(result);
         });
     });
-    return gate
+    return gate_obj
 }
 
 async function set_gate_to_callsign(airport, gate_id, callsign){
-
+    /* Check if gate exists */
+    var gate_obj = await get_gate_for_gateid(airport, gate_id);
+    if(gate_obj == null){
+        if (DEBUG) console.log("ERR: gate " + gate_id + " does not exist");
+        return {success: false, code: "GATE_NOT_EXIST", error: "Gate "+ gate_id+" does not exist"}
+    }
     /* Check if gate is not occupied */
-    var cur_gate = await get_gate_for_gateid(airport, gate_id);
-    if (cur_gate.assigned_to != "none"){ 
-        if (DEBUG) console.log("ERR: gate " + gate_id + " already assigned to " + cur_gate.assigned_to);
-        return "ERR: gate already occupied"
+    if (gate_obj.occupied){ 
+        if (DEBUG) console.log("ERR: gate " + gate_id + " already assigned to " + gate_obj.assigned_to);
+        return {success: false, code: "GATE_OCCUPIED", error: "Gate "+ gate_id+ "already occupied"}
     }
 
-    /* Check if already has a reservation, if yes, return error*/
+    /* Check if callsign already has a reservation, if yes, return error*/
     var curr_reservation = await get_gate_for_callsign(callsign);
     if (curr_reservation != null){ 
-        if (DEBUG) console.log("ERR: "+ callsign +" already assigned to gate: " + gate_id)
-        return "ERR: already assigned to a gate"
+        if (DEBUG) console.log("ERR: "+ callsign +" already assigned to gate: " + curr_reservation.gate)
+        return {success: false, code: "CS_ALREADY_ASSIGNED", error: callsign + " already assigned to a gate"}
     }
-    
-    /* Get gate */
-    var gate = await new Promise((resolve, reject) => {
-        db.findOne({"airport":airport, "gate": gate_id}, (err, result) => {
+
+    /* Update gate */
+    gate_obj.occupied = true;
+    gate_obj.assigned_to = callsign;
+    var result_obj = await new Promise((resolve, reject) => {
+        db.update({"airport":airport, "gate": gate_id}, gate_obj, function(err, result){
             if (err) reject(err);
-            resolve(result);
+            resolve(gate_obj);
         });
     });
-
-    /* Gate exists, if no return error */
-    if (gate != null){
-        /* Update gate */
-        gate.occupied = true;
-        gate.assigned_to = callsign;
-        var result = await new Promise((resolve, reject) => {
-            db.update({"airport":airport, "gate": gate_id}, gate, function(err, result){
-                if (err) reject(err);
-                resolve(gate);
-            });
-        });
-
-       return result;
-    }else{
-        return "ERR: gate does not exist";
-    }
+    return {success: true, result: result_obj};
 }
-
-
-async function change_gate_for(callsign, gateid){
-    var old_gate = await get_gate_for_callsign(callsign);
-    var result = await clear_gate(old_gate["airport"], old_gate["gate"]);
-    var new_gate = await set_gate_to_callsign(old_gate["airport"],gateid, callsign);
-    return new_gate
-}
-
 
 async function clear_gate(airport, gate_id){
-    var gate = await new Promise((resolve, reject) => {
-        db.findOne({"airport":airport, "gate": gate_id}, (err, result) => {
-            if (err) reject(err);
-            resolve(result);
+    var gate_obj = await get_gate_for_gateid(airport, gate_id);
+    gate_obj.occupied = false;
+    gate_obj.assigned_to = "none";
+    var result_obj = await new Promise((resolve, reject) => {
+        db.update({"airport":airport, "gate": gate_id}, gate_obj, function(err, result){
+            if (err) reject({success: false, error: err});
+            resolve({success: true, result: gate_obj});
         });
     });
-    gate.occupied = false;
-    gate.assigned_to = "none";
-    var result = await new Promise((resolve, reject) => {
-        db.update({"airport":airport, "gate": gate_id}, gate, function(err, result){
-            if (err) reject(err);
-            resolve("OK");
-        });
-    });
-    return result;
+    return result_obj;
 }
 
+
+async function set_gate_for(callsign, airport, gateid){
+    var old_gate_obj = await get_gate_for_callsign(callsign);
+    /*Only clear old gate if callsign already has a gate assigned*/
+    if(old_gate_obj != null && old_gate_obj.occupied){
+        var result_obj = await clear_gate(old_gate_obj.airport, old_gate_obj.gate);
+    }
+    var new_gate = await set_gate_to_callsign(airport,gateid, callsign);
+    return new_gate
+}
 
 async function request_gate_for(airport, callsign, origin, ac){
     var aprons = f.get_valid_aprons(airport, callsign,origin, ac);
@@ -177,15 +162,15 @@ async function request_gate_for(airport, callsign, origin, ac){
 }
 
 async function request_gate_on_apron(airport, callsign, ac, apron){
-    var gates = await get_all_possible_gates_for(airport, ac, apron);
-    var temp_gate = gates[Math.floor(Math.random() * gates.length)];
+    var gates_list = await get_all_possible_gates_for(airport, ac, apron);
+    var temp_gate_obj = gates_list[Math.floor(Math.random() * gates_list.length)];
 
-    var result = await set_gate_to_callsign(airport, temp_gate["gate"], callsign)
-    while(typeof result === 'string' && result.startsWith("ERR")){
-        var temp_gate = gates[Math.floor(Math.random() * gates.length)];
-        var result = await set_gate_to_callsign(airport, temp_gate["gate"], callsign)
+    var result_obj = await set_gate_to_callsign(airport, temp_gate_obj.gate, callsign)
+    while(!result_obj.success){
+        var temp_gate_obj = gates_list[Math.floor(Math.random() * gates_list.length)];
+        var result_obj = await set_gate_to_callsign(airport, temp_gate_obj.gate, callsign)
     }
-    return result
+    return result_obj
 }
 
 async function load_active_clients(){
@@ -261,49 +246,51 @@ async function process_clients(clients){
             if (closestGate == null){
                 status = "taxing"
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
-                    var gate = await get_gate_for_callsign(callsign);
-                    if(gate!=null){
-                        var result = await clear_gate(gate.airport, gate.gate); 
-                        delete monitored_clients[callsign]
-                        if (DEBUG) console.log("deleted " + callsign)
+                    var gate_obj = await get_gate_for_callsign(callsign);
+                    if(gate_obj!=null){
+                        var result_obj = await clear_gate(gate_obj.airport, gate_obj.gate); 
+                        if(result_obj.success){
+                            delete monitored_clients[callsign]
+                            if (DEBUG) console.log("deleted " + callsign)
+                        }
                     }
                 }
             }else{
                 // AC is at gate
+                status = "at_gate"
                 var cur_gate = await get_gate_for_callsign(callsign);
                 if (cur_gate == null){
-                    let gate = await get_gate_for_gateid(closestGate.airport, closestGate.gate);
-                    if(gate.occupied == true){
+                    let gate_obj = await get_gate_for_gateid(closestGate.airport, closestGate.gate);
+                    if(gate_obj.occupied == true){
                         /* Gate was already assigned => double booking
-                           Make new reservation for that client */
-                        var other_callsign = gate.assigned_to;
-                        var other_apron = gate.apron;
-                        var other_airport = gate.airport
-                        clear_gate(gate.gate);
-                        request_gate_on_apron(other_airport, other_callsign, AC_code, [[other_apron], [other_apron]]);
+                           Make new reservation for that other client */
+                        var other_callsign = gate_obj.assigned_to;
+                        var other_apron = gate_obj.apron;
+                        var other_airport = gate_obj.airport
+                        var result_obj = await clear_gate(gate_obj.airport, gate_obj.gate);
+                        if (!result_obj.success && DEBUG) console.log(result_obj)
+
+                        result_obj = await request_gate_on_apron(other_airport, other_callsign, "ZZZ", [[other_apron], [other_apron]]);
+                        if (!result_obj.success && DEBUG) console.log(result_obj)
                     }
-                    var result = set_gate_to_callsign(gate.airport,gate.gate, callsign); 
+                    var result_obj = await set_gate_to_callsign(gate_obj.airport,gate_obj.gate, callsign); 
+                    if (!result_obj.success && DEBUG) console.log(result_obj)
+
                     monitored_clients[callsign] = "AUTO-DEP"
                     load_active_clients();
-                }/*else{
-                    if (cur_gate["gate"] != closestGate["gate"]){
-                        var new_gate = change_gate_for(callsign, closestGate["gate"])
-                        if((typeof new_gate === 'string' && new_gate.startsWith("ERR"))){
-                            //OOPS
-                        }
-                    }
-                }*/
-                status = "at_gate"
+                }
             }
         }else{
             if(airports_of_interest.includes(client.flight_plan.departure)){
                 status = "departed"
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
-                    var gate = await get_gate_for_callsign(callsign)
+                    var gate_obj = await get_gate_for_callsign(callsign)
                     if(gate!=null){
-                        var result = await clear_gate(gate.airport, gate.gate); 
-                        delete monitored_clients[callsign]
-                        if (DEBUG) console.log("deleted " + callsign)
+                        var result_obj = await clear_gate(gate_obj.airport, gate_obj.gate); 
+                        if(result_obj.success){
+                            delete monitored_clients[callsign]
+                            if (DEBUG) console.log("deleted " + callsign)
+                        }
                     }
                 }
             }else{
@@ -316,7 +303,8 @@ async function process_clients(clients){
                 if (arr_distance < 150){
                     var cur_gate = await get_gate_for_callsign(callsign);
                     if (cur_gate == null){
-                        var result = await request_gate_for(client.flight_plan.arrival, callsign, client.flight_plan.departure, AC_code)
+                        var result_obj = await request_gate_for(client.flight_plan.arrival, callsign, client.flight_plan.departure, AC_code)
+                        if (!result_obj.success && DEBUG) console.log(result_obj)
                         monitored_clients[callsign] = "AUTO_ARR"
                     }
                 }
@@ -325,8 +313,8 @@ async function process_clients(clients){
                 status = "arriving"
             }
         }
-        var result = await get_gate_for_callsign(callsign);
-        var gate = (result== null ? "": (result.gate)) 
+        var result_obj = await get_gate_for_callsign(callsign);
+        var gate = (result_obj== null ? "": (result_obj.gate)) 
         output_pilots.push(
             {"type"     : (airports_of_interest.includes(client.flight_plan.departure) ? "D":"A"),
              "callsign" : callsign, 
@@ -366,9 +354,12 @@ function bookkeep_clients(){
         }
         if (!found){
             if (DEBUG) console.log("cleaning up " + key)
-            var gate = await get_gate_for_callsign(key);
-            var result = await clear_gate(gate["airport"], gate["gate"]);
-            delete monitored_clients[key]
+            var gate_obj = await get_gate_for_callsign(key);
+            if(gate_obj != null){
+                var result_obj = await clear_gate(gate_obj["airport"], gate_obj["gate"]);
+                if (!result_obj.success && DEBUG) console.log(result_obj)
+                delete monitored_clients[key]
+            }
         }
     });
 }
@@ -387,14 +378,14 @@ exports.list_all_gates = async function(req, res) {
 
 /* /GET/all_gates/:airport/ */
 exports.list_all_gates_for_airport = async function(req, res) {
-    airport = req.params["airport"].toUpperCase();
+    airport = req.params.airport.toUpperCase();
     var gates = await get_all_gates_for_airport(airport)
     res.json(gates);
 };
 
 /* /POST/all_gates/:airport/ */
 exports.list_all_valid_gates = async function(req, res) {
-    airport = req.params["airport"].toUpperCase();;
+    airport = req.params.airport.toUpperCase();;
     callsign = req.body.callsign;
     origin = req.body.origin;
     ac = req.body.aircraft;
@@ -410,7 +401,7 @@ exports.get_gate_for_id = async function(req, res){
     gate_id = req.params["gateid"];
 
     var gate = await get_gate_for_gateid(airport, gate_id)
-    res.json(gate);
+    res.json(gate == null? [] : gate);
 };
 
 /* /POST/get_gate*/
@@ -421,64 +412,93 @@ exports.get_gate_for_callsign = async function(req, res){
     res.json(gate == null? [] : gate)
 }
 
-/* /POST/request_gate */
-exports.request_gate = async function(req, res){
+/* /POST/set_random_gate */
+exports.set_random_gate = async function(req, res){
     callsign = req.body.callsign;
     airport = req.body.airport.toUpperCase();;
     origin = req.body.origin;
     ac = req.body.aircraft;
 
-    var result = await request_gate_for(airport,callsign, origin, ac);
-    res.json(result);
-    monitored_clients[callsign] = "MANUAL"
-};
-
-/* /POST/change_gate */
-exports.change_gate = async function(req, res){
-    callsign = req.body.callsign;
-    requested_gateid = req.body.gate_id;
-
-    new_gate = await change_gate_for(callsign, requested_gateid)
-
-    if(typeof new_gate === 'string' && new_gate.startsWith("ERR")){
+    var result_obj = await request_gate_for(airport,callsign, origin, ac);
+    if (!result_obj.success){
         res.status(500).send(
         {
             error: {
-              status: 500,
-              message: new_gate,
+                status: 500,
+                message: result_obj.error,
             }
         });
     }else{
-        res.json(new_gate);
+        res.json(result_obj.result)
+        monitored_clients[callsign] = "MANUAL"
+        load_active_clients();
+    }
+};
+
+/* /POST/set_gate */
+exports.set_gate = async function(req, res){
+    callsign = req.body.callsign;
+    requested_airport = req.body.airport;
+    requested_gateid = req.body.gate_id;
+
+
+    result_obj = await set_gate_for(callsign, requested_airport, requested_gateid)
+    if (!result_obj.success){
+        res.status(500).send(
+        {
+            error: {
+                status: 500,
+                message: result_obj.error,
+            }
+        });
+    }else{
+        res.json(result_obj.result)
         monitored_clients[callsign] = "MANUAL"
         load_active_clients();
     }
 }
 
-/* /POST/toggle_reservation/:gateid */
-exports.toggle_reservation = async function(req, res){
+/* /POST/clear_gate/ */
+exports.clear_gate = async function(req, res){
     callsign = req.body.callsign;
-    var requested_gateid = req.params["gateid"];
-    var requested_airport = req.params["airport"].toUpperCase();;
-
-    var gate = await get_gate_for_gateid(requested_airport,requested_gateid);
-    if (gate.occupied == true){
-        var result = await clear_gate(requested_airport,requested_gateid);
-    }else{
-        var result = await set_gate_to_callsign(requested_airport, requested_gateid, callsign);
+    var gate_obj = await get_gate_for_callsign(callsign);
+    if(gate_obj == null){
+        res.status(500).send(
+            {
+                error: {
+                    status: 500,
+                    message: "Callsign is not assigned to gate",
+                }
+            });
     }
-    monitored_clients[callsign] = "MANUAL";
-    res.json(result);
-    load_active_clients();
+
+    var result_obj = await clear_gate(gate_obj.airport, gate_obj.gate)
+    if (!result_obj.success){
+        res.status(500).send(
+        {
+            error: {
+                status: 500,
+                message: result_obj.error,
+            }
+        });
+    }else{
+        delete monitored_clients[callsign]
+        res.json(result_obj.result)
+        load_active_clients();
+    }
 }
 
 /* /GET/get_pilots */
 exports.get_active_pilots = function(req, res){
-    airport = req.params["airport"].toUpperCase();
-    filtered_clients = pilots_of_interest.filter(function(el){
-        return el.arr_airport == airport || el.dep_airport == airport
-    });
-    res.json({"updated": last_updated, "clients": filtered_clients});
+    airport = req.params.airport.toUpperCase();
+    if(pilots_of_interest != null){
+        filtered_clients = pilots_of_interest.filter(function(el){
+            return el.arr_airport == airport || el.dep_airport == airport
+        });
+        res.json({"updated": last_updated, "clients": filtered_clients});
+    }else{
+        res.json({"updated": last_updated, "clients": null});
+    }
 }
 
 /* /GET/get_controllers */
@@ -516,7 +536,7 @@ exports.get_available_airports = function(req, res){
         },
         {
             "icao"     : "EBLG",
-            "active"   : true,
+            "active"   : false,
         },
     ])
 }
