@@ -228,6 +228,8 @@ async function process_clients(clients){
         const ground_speed = client.groundspeed
         const arrival = client.flight_plan.arrival
         const departure = client.flight_plan.departure
+        const flight_rule = client.flight_plan.flight_rules
+        
         let AC_code = client.flight_plan.aircraft.split("/")[0]
         if (AC_code.length==1){
             AC_code = client.flight_plan.aircraft.split("/")[1];
@@ -322,6 +324,7 @@ async function process_clients(clients){
              "callsign" : callsign, 
              "arr_airport"  : client.flight_plan.arrival,
              "dep_airport"   : client.flight_plan.departure,
+             "flight_rule"  : flight_rule,
              "ac"       : AC_code,
              "status"   : status,
              "distance" : arr_distance,
