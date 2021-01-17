@@ -1,11 +1,22 @@
 var fs = require('fs');
 var gates_json = JSON.parse(fs.readFileSync('api/data/gates.json', 'utf8'));
 const data = JSON.parse(fs.readFileSync('api/data/data.json', 'utf8'));
+const aircraft_data = JSON.parse(fs.readFileSync('api/data/aircrafts.json', 'utf8'))
+const airport_data = JSON.parse(fs.readFileSync('api/data/airports.json', 'utf8'))
+
 
 const airport_zones = {
     "EBBR" : [50.915, 50.886, 4.524, 4.45, 200],
     "EBBR_GA": [50.897989, 50.897117, 4.467701,  4.465336, 200],
     "ELLX": [49.6386, 49.6177, 6.237, 6.1868, 1400]
+}
+
+function get_aircraft_info(actype){
+    return aircraft_data[actype]
+}
+
+function get_airport_info(airport){
+    return airport_data[airport]
 }
 
 function binarySearch(items, value){
@@ -206,5 +217,7 @@ module.exports = {
     get_valid_aprons: get_valid_aprons,
     detect_GA: detect_GA,
     detect_MIL: detect_MIL,
+    get_aircraft_info: get_aircraft_info,
+    get_airport_info: get_airport_info,
     airport_zones: airport_zones,
 }

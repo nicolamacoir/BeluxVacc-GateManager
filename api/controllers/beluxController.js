@@ -319,13 +319,19 @@ async function process_clients(clients){
         const result_obj = await get_gate_for_callsign(callsign);
         const gate = (result_obj== null ? "": (result_obj.gate))
 
+        const arr_airport_info = f.get_airport_info(client.flight_plan.arrival)
+        const dep_airport_info = f.get_airport_info(client.flight_plan.departure)
+
         output_pilots.push(
             {"type"     : (airports_of_interest.includes(client.flight_plan.departure) ? "D":"A"),
              "callsign" : callsign, 
              "arr_airport"  : client.flight_plan.arrival,
+             "arr_airport_detailed": (arr_airport_info.name + " (" + arr_airport_info.country+")"),
              "dep_airport"   : client.flight_plan.departure,
+             "dep_airport_detailed": (dep_airport_info.name + " (" + dep_airport_info.country+")"),
              "flight_rule"  : flight_rule,
              "ac"       : AC_code,
+             "ac_detailed": f.get_aircraft_info(AC_code).name,
              "status"   : status,
              "distance" : arr_distance,
              "eta"      : ETA,
