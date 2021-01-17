@@ -409,8 +409,8 @@ exports.get_gate_for_id = async function(req, res){
 exports.get_gate_for_callsign = async function(req, res){
     callsign = req.body.callsign;
     
-    var gate = await get_gate_for_callsign(callsign)
-    res.json(gate == null? [] : gate)
+    var gate_obj = await get_gate_for_callsign(callsign)
+    res.json(gate_obj == null? [] : {gate:gate_obj.gate, assigned_to: gate_obj.assigned_to})
 }
 
 /* /POST/set_random_gate */
