@@ -314,7 +314,8 @@ async function process_clients(clients){
             }
         }
         var result_obj = await get_gate_for_callsign(callsign);
-        var gate = (result_obj== null ? "": (result_obj.gate)) 
+        var gate = (result_obj== null ? "": (result_obj.gate))
+
         output_pilots.push(
             {"type"     : (airports_of_interest.includes(client.flight_plan.departure) ? "D":"A"),
              "callsign" : callsign, 
@@ -324,8 +325,8 @@ async function process_clients(clients){
              "status"   : status,
              "distance" : arr_distance,
              "eta"      : ETA,
-             "eta_till_gate": ((ETA_till_gate) > 0 ? (ETA_till_gate +1) : ''),
-             "reservation": (arr_distance < 150 ?gate : '')
+             "eta_till_gate": ((gate== "" && ETA_till_gate > 0)  ? (ETA_till_gate +1) : ''),
+             "reservation": gate
             }
         );
     }
