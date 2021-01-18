@@ -268,7 +268,7 @@ async function process_clients(clients){
             flight_object.aircraft.detailed = "AC type unknown"
         
         /*Standard empty fields*/
-        flight_object.distance = ''
+        flight_object.miles_out = ''
         flight_object.eta = ''
         flight_object.eta_till_gate = ''
 
@@ -319,7 +319,7 @@ async function process_clients(clients){
             
             result_obj = await get_gate_for_callsign(callsign);
             const gate = (result_obj== null ? "": (result_obj.gate))
-            flight_object.reservation = gate;
+            flight_object.assigned_gate = gate;
             
             output_pilots.push(flight_object)
 
@@ -345,7 +345,7 @@ async function process_clients(clients){
                 }
             }
 
-            flight_object.reservation = '';
+            flight_object.assigned_gate = '';
             output_pilots.push(flight_object)
 
             if(both_airports_of_intrest && both_airports_already_processed == null){
@@ -380,10 +380,10 @@ async function process_clients(clients){
 
             flight_object.status = "arriving"
             flight_object.type = "A"
-            flight_object.distance = arr_distance
+            flight_object.miles_out = arr_distance
             flight_object.eta = ETA
             flight_object.eta_till_gate = ETA_till_gate
-            flight_object.reservation = gate_id
+            flight_object.assigned_gate = gate_id
             output_pilots.push(flight_object)
         }
     }
