@@ -494,7 +494,9 @@ exports.clear_gate = async function(req, res){
         });
     }else{
         delete monitored_clients[callsign]
-        res.json(result_obj.result)
+        res.json({
+            "cleared_gate": result_obj.result.gate
+        })
         load_active_clients();
     }
 }
