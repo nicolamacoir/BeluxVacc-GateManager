@@ -214,7 +214,7 @@ async function load_active_clients(){
     });
     if(intresting_clients != null){
         last_updated = Date.now()
-        return await process_clients(intresting_clients)
+        return await process_clients(intresting_clients).catch((err)=> console.log(err))
     }
 }
 
@@ -229,25 +229,57 @@ async function process_clients(clients){
         const arrival = client.flight_plan.arrival
         const departure = client.flight_plan.departure
         const flight_rule = client.flight_plan.flight_rules
-        
+
         let AC_code = client.flight_plan.aircraft.split("/")[0]
         if (AC_code.length==1){
             AC_code = client.flight_plan.aircraft.split("/")[1];
         }
 
-        let status = "UNKNOWN"
-        let arr_distance = ''
-        let ETA = ''
-        let ETA_till_gate = ''
+        const arr_airport_info = f.get_airport_info(client.flight_plan.arrival)
+        const dep_airport_info = f.get_airport_info(client.flight_plan.departure)
+        const ac_info = f.get_aircraft_info(AC_code)
 
+        const both_airports_of_intrest = airports_of_interest.includes(arrival) && airports_of_interest.includes(departure)
+        let both_airports_already_processed = null
+
+        let result_obj = null;
+        let flight_object = {}
+        flight_object.callsign = callsign;
+        flight_object.flight_rule = flight_rule;
+        flight_object.dep_airport = {}
+        flight_object.dep_airport.icao = client.flight_plan.departure;
+        if(dep_airport_info)
+            flight_object.dep_airport.detailed = (dep_airport_info.name + " (" + dep_airport_info.country+")")
+        else
+            flight_object.dep_airport.detailed = "Airport unknown"
+        
+        flight_object.arr_airport = {}
+        flight_object.arr_airport.icao = client.flight_plan.arrival
+        if(arr_airport_info)
+            flight_object.arr_airport.detailed = (arr_airport_info.name + " (" + arr_airport_info.country+")")
+        else
+            flight_object.arr_airport.detailed = "Airport unknown"
+        
+        flight_object.aircraft = {}
+        flight_object.aircraft.icao = AC_code;
+        if(ac_info)
+            flight_object.aircraft.detailed = ac_info.name;
+        else
+            flight_object.aircraft.detailed = "AC type unknown"
+        
+        /*Standard empty fields*/
+        flight_object.distance = ''
+        flight_object.eta = ''
+        flight_object.eta_till_gate = ''
+
+        /* IF AC on ground */
         const on_dep_ground = (client.flight_plan.departure in f.airport_zones ?  f.is_on_zone(f.airport_zones[client.flight_plan.departure], lat, long, altitude) : false);
         const on_arr_ground = (client.flight_plan.arrival in f.airport_zones ?  f.is_on_zone(f.airport_zones[client.flight_plan.arrival], lat, long, altitude) : false);
-
         if (on_dep_ground || on_arr_ground){
             const closestGate = f.get_gate_for_position(lat, long);
             // CHECK gate reservation OK
             if (closestGate == null){
-                status = "taxing"
+                flight_object.status = "taxing"
                 if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
                     const gate_obj = await get_gate_for_callsign(callsign);
                     if(gate_obj!=null){
@@ -260,7 +292,7 @@ async function process_clients(clients){
                 }
             }else{
                 // AC is at gate
-                status = "at_gate"
+                flight_object.status = "at_gate"
                 const cur_gate = await get_gate_for_callsign(callsign);
                 if (cur_gate == null){
                     const gate_obj = await get_gate_for_gateid(closestGate.airport, closestGate.gate);
@@ -270,75 +302,90 @@ async function process_clients(clients){
                         const other_callsign = gate_obj.assigned_to;
                         const other_apron = gate_obj.apron;
                         const other_airport = gate_obj.airport
-                        let result_obj = await clear_gate(gate_obj.airport, gate_obj.gate);
+                        result_obj = await clear_gate(gate_obj.airport, gate_obj.gate);
                         if (!result_obj.success && DEBUG) console.log(result_obj)
 
                         result_obj = await request_gate_on_apron(other_airport, other_callsign, "ZZZ", [[other_apron], [other_apron]]);
                         if (!result_obj.success && DEBUG) console.log(result_obj)
                     }
-                    const result_obj = await set_gate_to_callsign(gate_obj.airport,gate_obj.gate, callsign); 
+                    result_obj = await set_gate_to_callsign(gate_obj.airport,gate_obj.gate, callsign); 
                     if (!result_obj.success && DEBUG) console.log(result_obj)
 
                     monitored_clients[callsign] = "AUTO-DEP"
                     load_active_clients();
                 }
             }
-        }else{
-            if(airports_of_interest.includes(client.flight_plan.departure)){
-                status = "departed"
-                if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
-                    const gate_obj = await get_gate_for_callsign(callsign)
-                    if(gate!=null){
-                        const result_obj = await clear_gate(gate_obj.airport, gate_obj.gate); 
-                        if(result_obj.success){
-                            delete monitored_clients[callsign]
-                            if (DEBUG) console.log("deleted " + callsign)
-                        }
-                    }
-                }
+            flight_object.type = (on_dep_ground ? "D" : "A")
+            
+            result_obj = await get_gate_for_callsign(callsign);
+            const gate = (result_obj== null ? "": (result_obj.gate))
+            flight_object.reservation = gate;
+            
+            output_pilots.push(flight_object)
+
+            if(both_airports_of_intrest){
+                both_airports_already_processed = flight_object.type 
             }else{
-                const location_client = {"latitude": lat, "longitude": long} 
-                const dest_airport = (client.flight_plan.arrival=="EBBR"?"EBCI": client.flight_plan.arrival) //Hack for south arrivals in brussels
-                arr_distance = parseInt(f.worldDistance(location_client, location_coordinates[dest_airport]))
-                if(parseInt(ground_speed) < 50)
-                    /* not yet departed from origin*/
-                    continue
-                if (arr_distance < 150){
-                    const cur_gate = await get_gate_for_callsign(callsign);
-                    if (cur_gate == null){
-                        const result_obj = await request_gate_for(client.flight_plan.arrival, callsign, client.flight_plan.departure, AC_code)
-                        if (!result_obj.success && DEBUG) console.log(result_obj)
-                        monitored_clients[callsign] = "AUTO_ARR"
-                    }
-                }
-                ETA = parseInt(arr_distance/parseInt(ground_speed)*60);
-                ETA_till_gate = parseInt((arr_distance-150)/parseInt(ground_speed)*60)
-                status = "arriving"
+                continue
             }
         }
-        const result_obj = await get_gate_for_callsign(callsign);
-        const gate = (result_obj== null ? "": (result_obj.gate))
 
-        const arr_airport_info = f.get_airport_info(client.flight_plan.arrival)
-        const dep_airport_info = f.get_airport_info(client.flight_plan.departure)
-
-        output_pilots.push(
-            {"type"     : (airports_of_interest.includes(client.flight_plan.departure) ? "D":"A"),
-             "callsign" : callsign, 
-             "arr_airport"  : client.flight_plan.arrival,
-             "arr_airport_detailed": (arr_airport_info.name + " (" + arr_airport_info.country+")"),
-             "dep_airport"   : client.flight_plan.departure,
-             "dep_airport_detailed": (dep_airport_info.name + " (" + dep_airport_info.country+")"),
-             "flight_rule"  : flight_rule,
-             "ac"       : AC_code,
-             "ac_detailed": f.get_aircraft_info(AC_code).name,
-             "status"   : status,
-             "distance" : arr_distance,
-             "eta"      : ETA,
-             "eta_till_gate": ((gate== "" && ETA_till_gate > 0)  ? (ETA_till_gate +1) : ''),
-             "reservation": gate
+        /* IF AC NOT ON GROUND ANYMORE/YET*/
+        if(airports_of_interest.includes(client.flight_plan.departure)){
+            flight_object.status = "departed"
+            flight_object.type = "D"
+            if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
+                const gate_obj = await get_gate_for_callsign(callsign)
+                if(gate!=null){
+                    const result_obj = await clear_gate(gate_obj.airport, gate_obj.gate);  
+                    if(result_obj.success){
+                        delete monitored_clients[callsign]
+                        if (DEBUG) console.log("deleted " + callsign)
+                    }
+                }
             }
-        );
+
+            flight_object.reservation = '';
+            output_pilots.push(flight_object)
+
+            if(both_airports_of_intrest && both_airports_already_processed == null){
+                both_airports_already_processed = flight_object.type 
+            }else{
+                continue
+            }
+        }
+        if(airports_of_interest.includes(client.flight_plan.arrival)){
+            const location_client = {"latitude": lat, "longitude": long} 
+            const dest_airport = (client.flight_plan.arrival=="EBBR"?"EBCI": client.flight_plan.arrival) //Hack for south arrivals in brussels
+            const arr_distance = parseInt(f.worldDistance(location_client, location_coordinates[dest_airport]))
+            let cur_gate = null;
+            if(parseInt(ground_speed) < 50)
+                continue
+            if (arr_distance < 150){
+                cur_gate = await get_gate_for_callsign(callsign);
+                if (cur_gate == null){
+                    cur_gate = await request_gate_for(client.flight_plan.arrival, callsign, client.flight_plan.departure, AC_code)
+                    if (!cur_gate.success && DEBUG) console.log(cur_gate)
+                    monitored_clients[callsign] = "AUTO_ARR"
+                }
+            }
+
+            result_obj = await get_gate_for_callsign(callsign);
+            const gate_id = (result_obj ? result_obj.gate : "")
+
+            const ETA = parseInt(arr_distance/parseInt(ground_speed)*60)
+            let ETA_till_gate = parseInt((arr_distance-150)/parseInt(ground_speed)*60)
+            ETA_till_gate = ((gate_id == "" && ETA_till_gate > 0) ? (ETA_till_gate+1) : '')
+
+
+            flight_object.status = "arriving"
+            flight_object.type = "A"
+            flight_object.distance = arr_distance
+            flight_object.eta = ETA
+            flight_object.eta_till_gate = ETA_till_gate
+            flight_object.reservation = gate_id
+            output_pilots.push(flight_object)
+        }
     }
     for (const [key, client] of Object.entries(clients.controllers)) {
         output_controllers.push(
@@ -350,7 +397,6 @@ async function process_clients(clients){
             }
         )
     }
-
     pilots_of_interest = output_pilots
     controllers_of_interest = output_controllers
     return {"status": "ok"}
@@ -506,7 +552,7 @@ exports.get_active_pilots = function(req, res){
     airport = req.params.airport.toUpperCase();
     if(pilots_of_interest != null){
         filtered_clients = pilots_of_interest.filter(function(el){
-            return el.arr_airport == airport || el.dep_airport == airport
+            return el.arr_airport.icao == airport || el.dep_airport.icao == airport
         });
         res.json({"updated": last_updated, "clients": filtered_clients});
     }else{

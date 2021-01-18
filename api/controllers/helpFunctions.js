@@ -12,11 +12,15 @@ const airport_zones = {
 }
 
 function get_aircraft_info(actype){
-    return aircraft_data[actype]
+    if (actype in aircraft_data)
+        return aircraft_data[actype]
+    return null;
 }
 
 function get_airport_info(airport){
-    return airport_data[airport]
+    if (airport in airport_data)
+        return airport_data[airport]
+    return null
 }
 
 function binarySearch(items, value){
