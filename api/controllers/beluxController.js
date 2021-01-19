@@ -79,6 +79,16 @@ async function get_all_possible_gates_for(airport, ac, apron_input){
     return gate_list
 }
 
+async function get_all_assigned_gates(){
+    const gate_list = await new Promise((resolve, reject) => {
+        db.find({"occupied":true}, {"_id": 0, "__v":0, "apron":0, "latitude":0, "longitude":0, "occupied":0}).exec((err, result) => {
+            if (err) reject(err);
+            resolve(result);
+        });
+    });
+    return gate_list
+}
+
 async function get_gate_for_gateid(airport, gate_id){
     const gate_obj = await new Promise((resolve, reject) => {
         db.findOne({"airport":airport, "gate": gate_id}, {"_id": 0, "__v":0}, (err, result) => {
@@ -467,6 +477,11 @@ exports.get_gate_for_callsign = async function(req, res){
     
     const gate_obj = await get_gate_for_callsign(callsign)
     res.json(gate_obj == null? [] : {gate:gate_obj.gate, assigned_to: gate_obj.assigned_to})
+}
+
+exports.get_all_assigned_gates = async function(req, res){
+    const gate_list = await get_all_assigned_gates()
+    res.json(gate_list)
 }
 
 /* /POST/set_random_gate */

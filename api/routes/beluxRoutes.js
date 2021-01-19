@@ -16,6 +16,9 @@ module.exports = function(app) {
     app.route('/get_gate/:airport/:gateid')
     .get(belux.get_gate_for_id)
 
+    app.route('/get_all_assigned_gates')
+    .get(belux.get_all_assigned_gates)
+
     app.route('/set_random_gate')
     .post(belux.set_random_gate)
 
