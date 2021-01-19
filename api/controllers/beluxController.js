@@ -342,8 +342,6 @@ async function process_clients(clients){
 
         /* IF AC NOT ON GROUND ANYMORE/YET*/
         if(airports_of_interest.includes(client.flight_plan.departure) && (!both_airports_of_intrest || both_airports_already_processed != "D")){
-            flight_object.status = "departed"
-            flight_object.type = "D"
             if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
                 const gate_obj = await get_gate_for_callsign(callsign)
                 if(gate_obj!=null){
@@ -354,10 +352,6 @@ async function process_clients(clients){
                     }
                 }
             }
-
-            flight_object.assigned_gate = '';
-            output_pilots.push(flight_object)
-
             if(both_airports_of_intrest && both_airports_already_processed == null){
                 both_airports_already_processed = flight_object.type 
             }else{
