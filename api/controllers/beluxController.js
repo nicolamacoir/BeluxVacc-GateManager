@@ -341,12 +341,12 @@ async function process_clients(clients){
         }
 
         /* IF AC NOT ON GROUND ANYMORE/YET*/
-        if(airports_of_interest.includes(client.flight_plan.departure)){
+        if(airports_of_interest.includes(client.flight_plan.departure) && (!both_airports_of_intrest || both_airports_already_processed != "D")){
             flight_object.status = "departed"
             flight_object.type = "D"
             if ( callsign in monitored_clients && monitored_clients[callsign] == "AUTO-DEP"){
                 const gate_obj = await get_gate_for_callsign(callsign)
-                if(gate!=null){
+                if(gate_obj!=null){
                     const result_obj = await clear_gate(gate_obj.airport, gate_obj.gate);  
                     if(result_obj.success){
                         delete monitored_clients[callsign]
@@ -364,7 +364,7 @@ async function process_clients(clients){
                 continue
             }
         }
-        if(airports_of_interest.includes(client.flight_plan.arrival)){
+        if(airports_of_interest.includes(client.flight_plan.arrival) && (!both_airports_of_intrest || both_airports_already_processed != "A")){
             const location_client = {"latitude": lat, "longitude": long} 
             const dest_airport = (client.flight_plan.arrival=="EBBR"?"EBCI": client.flight_plan.arrival) //Hack for south arrivals in brussels
             const arr_distance = parseInt(f.worldDistance(location_client, location_coordinates[dest_airport]))
@@ -567,7 +567,7 @@ exports.get_active_pilots = function(req, res){
     airport = req.params.airport.toUpperCase();
     if(pilots_of_interest != null){
         filtered_clients = pilots_of_interest.filter(function(el){
-            return el.arr_airport.icao == airport || el.dep_airport.icao == airport
+            return (el.arr_airport.icao == airport && el.type=="A") || (el.dep_airport.icao == airport && el.type == "D")
         });
         res.json({"updated": last_updated, "clients": filtered_clients});
     }else{
