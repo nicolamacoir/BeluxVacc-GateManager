@@ -3,11 +3,8 @@
 module.exports = function(app) {
     var belux = require('../controllers/beluxController');
 
-    app.route('/gates')
+    app.route('/gates/:airport?')
     .get(belux.list_all_gates)
-
-    app.route('/gates/:airport')
-    .get(belux.list_all_gates_for_airport)
     .post(belux.list_all_valid_gates)
 
     app.route('/get_gate/')
@@ -28,10 +25,10 @@ module.exports = function(app) {
     app.route('/clear_gate')
     .post(belux.clear_gate)
 
-    app.route('/get_pilots/:airport')
+    app.route('/get_pilots/:airport?')
     .get(belux.get_active_pilots)
 
-    app.route('/get_controllers')
+    app.route('/get_controllers/:airport?')
     .get(belux.get_active_controllers)
 
     app.route('/force_get_clients')

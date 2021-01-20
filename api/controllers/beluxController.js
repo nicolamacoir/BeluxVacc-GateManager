@@ -16,10 +16,15 @@ const location_coordinates = {
     "EBCI" : {"latitude": 50.4647, "longitude": 4.4611},
     "ELLX" : {"latitude": 49.6313, "longitude": 6.2157}
 }
+const relevant_controllers = {
+    "EBBR" : ["EBBR_DEL", "EBBR_GND", "EBBR_N_GND", "EBBR_TWR", "EBBR_N_TWR", "EBBR_APP", "EBBR_F_APP", "EBBR_DEP","EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
+    "ELLX" : ["ELLX_TWR", "ELLX_APP", "ELLX_F_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"]
+}
 
 // INJECT DATA IN DATABASE
 const db = new Datastore();
 const json = require('../data/gates.json');
+const { rest } = require("underscore");
 db.insert(json, function(err, result){
      if(!err){
         if (DEBUG) console.log("succesfully imported!")
@@ -86,6 +91,12 @@ async function get_all_assigned_gates(){
             resolve(result);
         });
     });
+    // const reduced_list = Array.from(
+    //     gate_list.reduce((a, {airport, ...rest})=>{
+    //         return a.set(airport, [rest].concat(a.get(airport)||[]));
+    //     }, new Map())
+    // )//.map(([group, children]) => ({group, children}));
+    // console.log(JSON.stringify(reduced_list))
     return gate_list
 }
 
@@ -433,20 +444,22 @@ setInterval(bookkeep_clients, 120*1000);
 
 /* /GET/all_gates */
 exports.list_all_gates = async function(req, res) {
-    const gates = await get_all_gates()
-    res.json(gates);
-};
-
-/* /GET/all_gates/:airport/ */
-exports.list_all_gates_for_airport = async function(req, res) {
-    airport = req.params.airport.toUpperCase();
-    const gates = await get_all_gates_for_airport(airport)
+    let gates = null;
+    if ( req.params.airport){
+        airport = req.params.airport.toUpperCase();
+        gates = await get_all_gates_for_airport(airport)
+    }else{
+        gates = await get_all_gates()
+    }
     res.json(gates);
 };
 
 /* /POST/all_gates/:airport/ */
 exports.list_all_valid_gates = async function(req, res) {
-    airport = req.params.airport.toUpperCase();;
+    if(req.params.airport)
+        airport = req.params.airport.toUpperCase();
+    else
+        airport = "EBBR"
     callsign = req.body.callsign;
     origin = req.body.origin;
     ac = req.body.aircraft;
@@ -558,20 +571,28 @@ exports.clear_gate = async function(req, res){
 
 /* /GET/get_pilots */
 exports.get_active_pilots = function(req, res){
-    airport = req.params.airport.toUpperCase();
-    if(pilots_of_interest != null){
+    if(req.params.airport && pilots_of_interest != null){
+        airport = req.params.airport.toUpperCase();
         filtered_clients = pilots_of_interest.filter(function(el){
             return (el.arr_airport.icao == airport && el.type=="A") || (el.dep_airport.icao == airport && el.type == "D")
         });
         res.json({"updated": last_updated, "clients": filtered_clients});
     }else{
-        res.json({"updated": last_updated, "clients": null});
+        res.json({"updated": last_updated, "clients": pilots_of_interest});
     }
 }
 
 /* /GET/get_controllers */
 exports.get_active_controllers = function(req, res){
-    res.json({"updated": last_updated, "clients": controllers_of_interest});
+    if(req.params.airport && controllers_of_interest != null){
+        airport = req.params.airport.toUpperCase();
+        filtered_clients = controllers_of_interest.filter(function(el){
+            return relevant_controllers[airport].contains(el.callsign)
+        })
+        res.json({"updated": last_updated, "clients": filtered_clients});
+    }else{
+        res.json({"updated": last_updated, "clients": controllers_of_interest});
+    }
 }
 
 /* /GET/force_get_clients */
