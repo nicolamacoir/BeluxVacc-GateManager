@@ -3,7 +3,7 @@ const _ = require('underscore');
 const Datastore = require('nedb')
 const f = require('./helpFunctions.js');
 
-let DEBUG = false;
+let DEBUG = process.env.VERBOSE || true;
 let pilots_of_interest = null;
 let controllers_of_interest = null;
 let monitored_clients = {}

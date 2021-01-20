@@ -1,5 +1,8 @@
 FROM node:14.15
 
+ARG VERBOSE
+ENV VERBOSE "$VERBOSE"
+
 # Create app directory
 WORKDIR /usr/src/app
 
