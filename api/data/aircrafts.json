@@ -91,7 +91,7 @@
 	},
 	"A19N": {
 		"type": "LandPlane",
-		"name": "A-319neo",
+		"name": "A-319 Neo",
 		"wtc": "M"
 	},
 	"A20": {
@@ -201,27 +201,27 @@
 	},
 	"A310": {
 		"type": "LandPlane",
-		"name": "A-310",
+		"name": "A-310-200/300 Freighter ",
 		"wtc": "H"
 	},
 	"A318": {
 		"type": "LandPlane",
-		"name": "Elite",
+		"name": "A-318 (Sharkelts)",
 		"wtc": "M"
 	},
 	"A319": {
 		"type": "LandPlane",
-		"name": "VC-1 ACJ",
+		"name": "A-319 Ceo (Sharklets) ",
 		"wtc": "M"
 	},
 	"A320": {
 		"type": "LandPlane",
-		"name": "A-320 Prestige",
+		"name": "A-320-200 Ceo (Sharklets)",
 		"wtc": "M"
 	},
 	"A321": {
 		"type": "LandPlane",
-		"name": "A-321",
+		"name": "A-321-100/200 Ceo ",
 		"wtc": "M"
 	},
 	"A33": {
@@ -231,7 +231,7 @@
 	},
 	"A332": {
 		"type": "LandPlane",
-		"name": "A-330-200 Voyager",
+		"name": "A-330-200 ",
 		"wtc": "H"
 	},
 	"A333": {
@@ -246,22 +246,22 @@
 	},
 	"A342": {
 		"type": "LandPlane",
-		"name": "A-340-200 Prestige",
+		"name": "A-340-200 ",
 		"wtc": "H"
 	},
 	"A343": {
 		"type": "LandPlane",
-		"name": "A-340-300 Prestige",
+		"name": "A-340-300",
 		"wtc": "H"
 	},
 	"A345": {
 		"type": "LandPlane",
-		"name": "A-340-500 Prestige",
+		"name": "A-340-500",
 		"wtc": "H"
 	},
 	"A346": {
 		"type": "LandPlane",
-		"name": "A-340-600 Prestige",
+		"name": "A-340-600",
 		"wtc": "H"
 	},
 	"A35": {
@@ -286,7 +286,7 @@
 	},
 	"A388": {
 		"type": "LandPlane",
-		"name": "A-380-800 Prestige",
+		"name": "A-380-800",
 		"wtc": "H"
 	},
 	"A3ST": {
@@ -12641,12 +12641,12 @@
 	},
 	"WA42": {
 		"type": "LandPlane",
-		"name": "Prestige",
+		"name": "Prestig",
 		"wtc": "L"
 	},
 	"WA50": {
 		"type": "LandPlane",
-		"name": "Atlantic",
+		"name": "WA-51 Pacific ",
 		"wtc": "L"
 	},
 	"WA80": {
