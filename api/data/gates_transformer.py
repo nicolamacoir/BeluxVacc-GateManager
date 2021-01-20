@@ -9,7 +9,6 @@ with open('gates.json', 'w') as outfile:
             continue
         if(str(row[2]).rstrip().endswith("L")):
             continue
-        #outfile.write("\t\"{}\":{{\n".format(row[1]))
         outfile.write("\t{\n")
         outfile.write("\t\t\"airport\": \"{}\",\n".format(str(row[0]).rstrip()))
         outfile.write("\t\t\"gate\": \"{}\",\n".format(str(row[2]).rstrip()))
