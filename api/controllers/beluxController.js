@@ -587,7 +587,7 @@ exports.get_active_controllers = function(req, res){
     if(req.params.airport && controllers_of_interest != null){
         airport = req.params.airport.toUpperCase();
         filtered_clients = controllers_of_interest.filter(function(el){
-            return relevant_controllers[airport].contains(el.callsign)
+            return relevant_controllers[airport].includes(el.callsign)
         })
         res.json({"updated": last_updated, "clients": filtered_clients});
     }else{
