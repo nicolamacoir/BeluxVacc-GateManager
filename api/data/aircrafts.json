@@ -2191,12 +2191,12 @@
 	},
 	"C04T": {
 		"type": "LandPlane",
-		"name": "404 (turbine)",
+		"name": "Cessna 404 (turbine)",
 		"wtc": "L"
 	},
 	"C06T": {
 		"type": "LandPlane",
-		"name": "206 (turbine)",
+		"name": "Cessna 206 (turbine)",
 		"wtc": "L"
 	},
 	"C07T": {
@@ -2231,7 +2231,7 @@
 	},
 	"C120": {
 		"type": "LandPlane",
-		"name": "120",
+		"name": "Cessna 120",
 		"wtc": "L"
 	},
 	"C123": {
@@ -2261,7 +2261,7 @@
 	},
 	"C140": {
 		"type": "LandPlane",
-		"name": "140",
+		"name": "Cessna 140",
 		"wtc": "L"
 	},
 	"C141": {
@@ -2281,12 +2281,12 @@
 	},
 	"C150": {
 		"type": "LandPlane",
-		"name": "150",
+		"name": "Cessna 150",
 		"wtc": "L"
 	},
 	"C152": {
 		"type": "LandPlane",
-		"name": "152",
+		"name": "Cessna 152",
 		"wtc": "L"
 	},
 	"C160": {
@@ -2306,32 +2306,32 @@
 	},
 	"C170": {
 		"type": "LandPlane",
-		"name": "170",
+		"name": "Cessna 170",
 		"wtc": "L"
 	},
 	"C172": {
 		"type": "LandPlane",
-		"name": "172",
+		"name": "Cessna 172",
 		"wtc": "L"
 	},
 	"C175": {
 		"type": "LandPlane",
-		"name": "175",
+		"name": "Cessna 175",
 		"wtc": "L"
 	},
 	"C177": {
 		"type": "LandPlane",
-		"name": "177",
+		"name": "Cessna 177",
 		"wtc": "L"
 	},
 	"C180": {
 		"type": "LandPlane",
-		"name": "180",
+		"name": "Cessna 180",
 		"wtc": "L"
 	},
 	"C182": {
 		"type": "LandPlane",
-		"name": "182",
+		"name": "Cessna 182",
 		"wtc": "L"
 	},
 	"C185": {
@@ -2341,17 +2341,17 @@
 	},
 	"C188": {
 		"type": "LandPlane",
-		"name": "188",
+		"name": "Cessna 188",
 		"wtc": "L"
 	},
 	"C190": {
 		"type": "LandPlane",
-		"name": "190",
+		"name": "Cessna 190",
 		"wtc": "L"
 	},
 	"C195": {
 		"type": "LandPlane",
-		"name": "195",
+		"name": "Cessna 195",
 		"wtc": "L"
 	},
 	"C2": {
@@ -2361,27 +2361,27 @@
 	},
 	"C205": {
 		"type": "LandPlane",
-		"name": "205",
+		"name": "Cessna 205",
 		"wtc": "L"
 	},
 	"C206": {
 		"type": "LandPlane",
-		"name": "206",
+		"name": "Cessna 206",
 		"wtc": "L"
 	},
 	"C207": {
 		"type": "LandPlane",
-		"name": "207 Skywagon 207",
+		"name": "Cessna 207 Skywagon",
 		"wtc": "L"
 	},
 	"C208": {
 		"type": "LandPlane",
-		"name": "208 Caravan 1",
+		"name": "Cessna 208 Caravan 1",
 		"wtc": "L"
 	},
 	"C210": {
 		"type": "LandPlane",
-		"name": "210",
+		"name": "Cessna 210",
 		"wtc": "L"
 	},
 	"C212": {
