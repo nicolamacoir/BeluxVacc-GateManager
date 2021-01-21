@@ -3,7 +3,9 @@ const _ = require('underscore');
 const Datastore = require('nedb')
 const f = require('./helpFunctions.js');
 
-let DEBUG = process.env.VERBOSE || true;
+require('dotenv').config();
+let DEBUG = process.env.VERBOSE || false;
+
 let pilots_of_interest = null;
 let controllers_of_interest = null;
 let monitored_clients = {}
@@ -19,6 +21,10 @@ const location_coordinates = {
 const relevant_controllers = {
     "EBBR" : ["EBBR_DEL", "EBBR_GND", "EBBR_N_GND", "EBBR_TWR", "EBBR_N_TWR", "EBBR_APP", "EBBR_F_APP", "EBBR_DEP","EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
     "ELLX" : ["ELLX_TWR", "ELLX_APP", "ELLX_F_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"]
+    // "EBAW" : ["EBAW_GND", "EBAW_TWR", "EBBR_DEP", "EBBR_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
+    // "EBOS" : ["EBOS_GND", "EBOS_TWR", "EBOS_APP",, "EBBU_CTR", "EBBU_W_CTR"],
+    // "EBCI" : ["EBCI_GND", "EBCI_TWR", "EBCI_APP", "EBBR_DEP", "EBBR_APP", "EBBR_S_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
+    // "EBLG" : ["EBLG_GND", "EBLG_TWR", "EBLG_APP", "EBBU_CTR", "EBBU_E_CTR"]
 }
 
 // INJECT DATA IN DATABASE
@@ -176,11 +182,6 @@ async function set_gate_for(callsign, airport, gateid){
     return new_gate
 }
 
-async function request_gate_for(airport, callsign, origin, ac){
-    const aprons = f.get_valid_aprons(airport, callsign,origin, ac);
-    return await request_gate_on_apron(airport, callsign, ac, aprons);
-}
-
 async function request_gate_on_apron(airport, callsign, ac, apron){
     const gates_list = await get_all_possible_gates_for(airport, ac, apron);
 
@@ -241,6 +242,10 @@ async function load_active_clients(){
 
 async function process_clients(clients){
     let i, output_pilots=[], output_controllers=[];
+    if(DEBUG){
+        console.log(`processing ${clients.pilots.length} pilots`)
+        console.time("process_clients")
+    } 
     for (const [key, client] of Object.entries(clients.pilots)) {
         const callsign = client.callsign
         const lat = client.latitude
@@ -314,8 +319,8 @@ async function process_clients(clients){
             }else{
                 // AC is at gate
                 flight_object.status = "at_gate"
-                const cur_gate = await get_gate_for_callsign(callsign);
-                if (cur_gate == null){
+                const cur_gate_obj = await get_gate_for_callsign(callsign);
+                if (cur_gate_obj == null){
                     const gate_obj = await get_gate_for_gateid(closestGate.airport, closestGate.gate);
                     if(gate_obj.occupied == true){
                         /* Gate was already assigned => double booking
@@ -333,7 +338,16 @@ async function process_clients(clients){
                     if (!result_obj.success && DEBUG) console.log(result_obj)
 
                     monitored_clients[callsign] = "AUTO-DEP"
-                    load_active_clients();
+                }else{
+                    if((cur_gate_obj.gate != closestGate.gate) && (cur_gate_obj.airport != closestGate.airport)){
+                        //Free reservation
+                        result_obj = await clear_gate(cur_gate_obj.airport, cur_gate_obj.gate);
+                        if (!result_obj.success && DEBUG) console.log(result_obj);
+
+                        //Book clossest gate
+                        result_obj = await set_gate_to_callsign(closestGate.airport,closestGate.gate, callsign); 
+                        if (!result_obj.success && DEBUG) console.log(result_obj)
+                    }
                 }
             }
             flight_object.type = (on_dep_ground ? "D" : "A")
@@ -371,15 +385,17 @@ async function process_clients(clients){
         }
         if(airports_of_interest.includes(client.flight_plan.arrival) && (!both_airports_of_intrest || both_airports_already_processed != "A")){
             const location_client = {"latitude": lat, "longitude": long} 
-            const dest_airport = (client.flight_plan.arrival=="EBBR"?"EBCI": client.flight_plan.arrival) //Hack for south arrivals in brussels
-            const arr_distance = parseInt(f.worldDistance(location_client, location_coordinates[dest_airport]))
+            //const dest_airport = (["ELLX","EBBR"].includes(client.flight_plan.arrival)?"EBCI": client.flight_plan.arrival) //Hack for south arrivals in brussels
+            const arr_distance = parseInt(f.worldDistance(location_client, location_coordinates["EBCI"]))
             let cur_gate = null;
             if(parseInt(ground_speed) < 50)
                 continue
             if (arr_distance < 150){
                 cur_gate = await get_gate_for_callsign(callsign);
                 if (cur_gate == null){
-                    cur_gate = await request_gate_for(client.flight_plan.arrival, callsign, client.flight_plan.departure, AC_code)
+                    const aprons = f.get_valid_aprons(client.flight_plan.arrival, callsign,client.flight_plan.departure, AC_code, client.flight_plan.remarks.toUpperCase().includes("CARGO"));
+                    cur_gate = await request_gate_on_apron(client.flight_plan.arrival, callsign, AC_code, aprons);
+
                     if (!cur_gate.success && DEBUG) console.log(cur_gate)
                     monitored_clients[callsign] = "AUTO_ARR"
                 }
@@ -412,6 +428,9 @@ async function process_clients(clients){
             }
         )
     }
+    if(DEBUG){
+        console.timeEnd("process_clients")
+    } 
     pilots_of_interest = output_pilots
     controllers_of_interest = output_controllers
     return {"status": "ok"}
@@ -498,7 +517,8 @@ exports.set_random_gate = async function(req, res){
     origin = req.body.origin;
     ac = req.body.aircraft;
 
-    const result_obj = await request_gate_for(airport,callsign, origin, ac);
+    const aprons = f.get_valid_aprons(airport, callsign,origin, ac);
+    const result_obj =  await request_gate_on_apron(airport, callsign, ac, aprons);
     if (!result_obj.success){
         res.status(500).send(
         {
