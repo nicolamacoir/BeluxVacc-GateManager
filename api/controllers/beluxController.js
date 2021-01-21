@@ -4,7 +4,7 @@ const Datastore = require('nedb')
 const f = require('./helpFunctions.js');
 
 require('dotenv').config();
-let DEBUG = process.env.VERBOSE || false;
+let DEBUG = true//process.env.VERBOSE || false;
 
 let pilots_of_interest = null;
 let controllers_of_interest = null;
