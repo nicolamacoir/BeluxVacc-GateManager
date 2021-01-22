@@ -4,7 +4,7 @@ const Datastore = require('nedb')
 const f = require('./helpFunctions.js');
 
 require('dotenv').config();
-let DEBUG = true//process.env.VERBOSE || false;
+let DEBUG = process.env.VERBOSE || false;
 
 let pilots_of_interest = null;
 let controllers_of_interest = null;
@@ -31,9 +31,10 @@ const relevant_controllers = {
 const db = new Datastore();
 const json = require('../data/gates.json');
 const { rest } = require("underscore");
+const { is_on_zone } = require("./helpFunctions.js");
 db.insert(json, function(err, result){
      if(!err){
-        if (DEBUG) console.log("succesfully imported!")
+        if (DEBUG) console.log("succesfully imported gate data")
          db.update({}, {$set:{"occupied":false, "assigned_to": "none"}},{multi:true})
      }
 });
@@ -220,6 +221,14 @@ async function load_active_clients(){
                 else if (airports_of_interest.includes(client.flight_plan.arrival)  && f.worldDistance(location_client, location_coordinates[client.flight_plan.arrival]) < 300){
                     pilots_of_interest.push(client)
                 }
+            }else{
+                let k;
+                for(k=0;k<airports_of_interest.length;k++){
+                    if(is_on_zone(f.airport_zones[airports_of_interest[k]], client.latitude, client.longitude, client.altitude)){
+                        pilots_of_interest.push(client)
+                        break;
+                    }
+                }
             }
         }
         for(i=0;i< out.controllers.length;i++){
@@ -252,6 +261,43 @@ async function process_clients(clients){
         const long = client.longitude
         const altitude = client.altitude
         const ground_speed = client.groundspeed
+
+        let result_obj = null;
+        if(!client.flight_plan){
+            let flight_object = {}
+            flight_object.callsign = callsign;
+            flight_object.status = "at_gate_unfilled"
+            let cur_gate_obj = await get_gate_for_callsign(callsign);
+            if (cur_gate_obj == null){
+                const closestGate = f.get_gate_for_position(lat, long);
+                const gate_obj = await get_gate_for_gateid(closestGate.airport, closestGate.gate);
+                if(gate_obj.occupied == true){
+                       /* Gate was already assigned => double booking
+                           Make new reservation for that other client */
+                        const other_callsign = gate_obj.assigned_to;
+                        const other_apron = gate_obj.apron;
+                        const other_airport = gate_obj.airport
+                        result_obj = await clear_gate(gate_obj.airport, gate_obj.gate);
+                        if (!result_obj.success && DEBUG) console.log(result_obj)
+
+                        result_obj = await request_gate_on_apron(other_airport, other_callsign, "ZZZ", [[other_apron], [other_apron]]);
+                        if (!result_obj.success && DEBUG) console.log(result_obj)
+                }
+                result_obj = await set_gate_to_callsign(gate_obj.airport,gate_obj.gate, callsign); 
+                if (!result_obj.success && DEBUG) console.log(result_obj)
+
+                monitored_clients[callsign] = "AUTO-DEP"
+                cur_gate_obj = result_obj
+            }
+            flight_object.type = "D"
+            flight_object.dep_airport = {}
+            flight_object.dep_airport.icao = cur_gate_obj.airport;
+
+            flight_object.assigned_gate = cur_gate_obj.gate;
+            output_pilots.push(flight_object)
+            continue;
+        }
+
         const arrival = client.flight_plan.arrival
         const departure = client.flight_plan.departure
         const flight_rule = client.flight_plan.flight_rules
@@ -268,7 +314,6 @@ async function process_clients(clients){
         const both_airports_of_intrest = airports_of_interest.includes(arrival) && airports_of_interest.includes(departure)
         let both_airports_already_processed = null
 
-        let result_obj = null;
         let flight_object = {}
         flight_object.callsign = callsign;
         flight_object.flight_rule = flight_rule;
@@ -312,7 +357,7 @@ async function process_clients(clients){
                         const result_obj = await clear_gate(gate_obj.airport, gate_obj.gate); 
                         if(result_obj.success){
                             delete monitored_clients[callsign]
-                            if (DEBUG) console.log("deleted " + callsign)
+                            if (DEBUG) console.log("cleared gate for departing " + callsign)
                         }
                     }
                 }
@@ -373,7 +418,7 @@ async function process_clients(clients){
                     const result_obj = await clear_gate(gate_obj.airport, gate_obj.gate);  
                     if(result_obj.success){
                         delete monitored_clients[callsign]
-                        if (DEBUG) console.log("deleted " + callsign)
+                        if (DEBUG) console.log("cleared gate for departed " + callsign)
                     }
                 }
             }
@@ -444,12 +489,12 @@ function bookkeep_clients(){
                 found = true
         }
         if (!found){
-            if (DEBUG) console.log("cleaning up " + key)
             const gate_obj = await get_gate_for_callsign(key);
             if(gate_obj != null){
                 const result_obj = await clear_gate(gate_obj["airport"], gate_obj["gate"]);
                 if (!result_obj.success && DEBUG) console.log(result_obj)
                 delete monitored_clients[key]
+                if (DEBUG) console.log("cleared gate for logged off " + key)
             }
         }
     });
@@ -594,7 +639,7 @@ exports.get_active_pilots = function(req, res){
     if(req.params.airport && pilots_of_interest != null){
         airport = req.params.airport.toUpperCase();
         filtered_clients = pilots_of_interest.filter(function(el){
-            return (el.arr_airport.icao == airport && el.type=="A") || (el.dep_airport.icao == airport && el.type == "D")
+            return (el.arr_airport && el.arr_airport.icao == airport && el.type=="A") || (el.dep_airport && el.dep_airport.icao == airport && el.type == "D")
         });
         res.json({"updated": last_updated, "clients": filtered_clients});
     }else{
