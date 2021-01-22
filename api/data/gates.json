@@ -1464,20 +1464,6 @@
 	},
 	{
 		"airport": "ELLX",
-		"gate": "V43A",
-		"apron": "apron-P1-V-heavy",
-		"latitude": 49.632530555555554,
-		"longitude": 6.219911111111111
-	},
-	{
-		"airport": "ELLX",
-		"gate": "V43B",
-		"apron": "apron-P1-V-heavy",
-		"latitude": 49.632675,
-		"longitude": 6.219472222222222
-	},
-	{
-		"airport": "ELLX",
 		"gate": "Z1",
 		"apron": "apron-P7-Z",
 		"latitude": 49.63811944444444,
@@ -1559,20 +1545,6 @@
 		"apron": "apron-P10-Z",
 		"latitude": 49.63491944444445,
 		"longitude": 6.225905555555556
-	},
-	{
-		"airport": "ELLX",
-		"gate": "Z12A",
-		"apron": "apron-P10-Z",
-		"latitude": 49.63457499999999,
-		"longitude": 6.225711111111111
-	},
-	{
-		"airport": "ELLX",
-		"gate": "Z12B",
-		"apron": "apron-P10-Z",
-		"latitude": 49.63491388888889,
-		"longitude": 6.225469444444445
 	},
 	{
 		"airport": "ELLX",
