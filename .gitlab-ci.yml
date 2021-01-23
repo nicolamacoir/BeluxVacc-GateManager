@@ -41,7 +41,7 @@ deploy-new-docker-container:
     - ssh-add <(echo "$CD_SERVER_PRIVATE_KEY" | base64 -d)
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - ssh -p $SSH_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab@server.beluxvacc.org "sudo docker run -d --name=${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG} -e TZ='UTC' --net=belux-internal --restart=unless-stopped ${IMAGE_TAG}"
+    - ssh -p $SSH_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab@server.beluxvacc.org "sudo docker run -d --name=${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG} -e TZ='UTC' -e VERBOSE=true --net=belux-internal --restart=unless-stopped ${IMAGE_TAG}"
   only:
     refs:
       - master
