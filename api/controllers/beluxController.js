@@ -39,6 +39,16 @@ db.insert(json, function(err, result){
      }
 });
 
+set_gate_to_callsign("EBBR", "120", "TEST1");
+set_gate_to_callsign("EBBR", "122", "TEST2");
+set_gate_to_callsign("EBBR", "124", "TEST3");
+set_gate_to_callsign("EBBR", "126", "TEST4");
+
+set_gate_to_callsign("EBBR", "433", "TEST5");
+set_gate_to_callsign("EBBR", "442", "TEST6");
+set_gate_to_callsign("EBBR", "316", "TEST7");
+set_gate_to_callsign("EBBR", "330", "TEST8");
+
 async function get_all_gates(){
     const gate_list = await new Promise((resolve, reject) => {
         db.find({}, {"_id": 0, "__v":0}).sort({occupied : -1, apron:1 }).exec((err, result) => {
