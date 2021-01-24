@@ -1,5 +1,5 @@
 var fs = require('fs');
-var gates_json = JSON.parse(fs.readFileSync('api/data/gates.json', 'utf8'));
+const gates_json = JSON.parse(fs.readFileSync('api/data/gates.json', 'utf8'));
 const data = JSON.parse(fs.readFileSync('api/data/data.json', 'utf8'));
 const aircraft_data = JSON.parse(fs.readFileSync('api/data/aircrafts.json', 'utf8'))
 const airport_data = JSON.parse(fs.readFileSync('api/data/airports.json', 'utf8'))
