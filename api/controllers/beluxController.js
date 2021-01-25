@@ -98,13 +98,17 @@ async function get_all_assigned_gates(){
             resolve(result);
         });
     });
-    // const reduced_list = Array.from(
-    //     gate_list.reduce((a, {airport, ...rest})=>{
-    //         return a.set(airport, [rest].concat(a.get(airport)||[]));
-    //     }, new Map())
-    // )//.map(([group, children]) => ({group, children}));
-    // console.log(JSON.stringify(reduced_list))
-    return gate_list
+
+    // Make compact for API
+    var grouped_by_airport = {}
+    for (let obj in gate_list) {
+        var airport = gate_list[obj].airport
+        if(!grouped_by_airport[airport])
+            grouped_by_airport[airport] = {}
+        grouped_by_airport[airport][gate_list[obj].assigned_to]  = gate_list[obj].gate
+    }
+
+    return [grouped_by_airport]
 }
 
 async function get_gate_for_gateid(airport, gate_id){
