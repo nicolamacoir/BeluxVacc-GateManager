@@ -79,6 +79,11 @@ set_gate_to_callsign("EBBR", "304", "TEST30");
 set_gate_to_callsign("EBBR", "306", "TEST31");
 set_gate_to_callsign("EBBR", "443", "TEST32");
 
+set_gate_to_callsign("ELLX", "G42A", "TEST29");
+set_gate_to_callsign("ELLX", "G51A", "TEST30");
+set_gate_to_callsign("ELLX", "G50A", "TEST31");
+set_gate_to_callsign("ELLX", "V13", "TEST32");
+
 
 
 async function get_all_gates(){
