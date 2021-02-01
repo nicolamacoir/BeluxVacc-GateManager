@@ -98,17 +98,7 @@ async function get_all_assigned_gates(){
             resolve(result);
         });
     });
-
-    // Make compact for API
-    var grouped_by_airport = {}
-    for (let obj in gate_list) {
-        var airport = gate_list[obj].airport
-        if(!grouped_by_airport[airport])
-            grouped_by_airport[airport] = {}
-        grouped_by_airport[airport][gate_list[obj].assigned_to]  = gate_list[obj].gate
-    }
-
-    return [grouped_by_airport]
+    return gate_list
 }
 
 async function get_gate_for_gateid(airport, gate_id){
@@ -556,7 +546,17 @@ exports.get_gate_for_callsign = async function(req, res){
 
 exports.get_all_assigned_gates = async function(req, res){
     const gate_list = await get_all_assigned_gates()
-    res.json(gate_list)
+
+    // Make compact for API
+    var grouped_by_airport = {}
+    for (let obj in gate_list) {
+        var airport = gate_list[obj].airport
+        if(!grouped_by_airport[airport])
+            grouped_by_airport[airport] = {}
+        grouped_by_airport[airport][gate_list[obj].assigned_to]  = gate_list[obj].gate
+    }
+
+    res.json([grouped_by_airport])
 }
 
 /* /POST/set_random_gate */

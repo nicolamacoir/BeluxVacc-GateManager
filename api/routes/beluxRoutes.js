@@ -36,4 +36,10 @@ module.exports = function(app) {
 
     app.route("/available_airports")
     .get(belux.get_available_airports)
+
+    app.route("/version/plugin")
+    .get((req, res) => { res.send("0.5.3")})
+
+    app.route("/version/API")
+    .get((req, res) => { res.send(process.env.npm_package_version)})
 };
