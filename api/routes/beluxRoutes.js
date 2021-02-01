@@ -22,6 +22,9 @@ module.exports = function(app) {
     app.route('/set_gate')
     .post(belux.set_gate)
 
+    app.route('/swap_gate')
+    .post(belux.swap_gate)
+
     app.route('/clear_gate')
     .post(belux.clear_gate)
 
