@@ -177,6 +177,19 @@ async function set_gate_for(callsign, airport, gateid){
     return new_gate
 }
 
+async function swap_gate_for(callsign, gateid){
+    let old_gate_obj = await get_gate_for_callsign(callsign);
+    /*Only clear old gate if callsign already has a gate assigned*/
+    if(old_gate_obj != null && old_gate_obj.occupied){
+        let tmp = old_gate_obj.airport
+        const result_obj = await clear_gate(old_gate_obj.airport, old_gate_obj.gate);
+        const new_gate = await set_gate_to_callsign(tmp,gateid, callsign);
+        return new_gate
+    }else{
+        return {success: false, code: "CALLSIGN_UNKNOWN", error: "Callsign  "+ callsign+" was not assigned to any gate"}
+    }
+}
+
 async function request_gate_on_apron(airport, callsign, ac, apron){
     const gates_list = await get_all_possible_gates_for(airport, ac, apron);
 
@@ -605,6 +618,30 @@ exports.set_gate = async function(req, res){
         load_active_clients();
     }
 }
+
+/* /POST/swap_gate */
+exports.swap_gate = async function(req, res){
+    callsign = req.body.callsign;
+    requested_gateid = req.body.gate_id;
+
+    const result_obj = await swap_gate_for(callsign, requested_gateid)
+    if (!result_obj.success){
+        res.status(500).send(
+        {
+            error: {
+                status: 500,
+                message: result_obj.error,
+            }
+        });
+    }else{
+        res.json(result_obj.result)
+        monitored_clients[callsign] = "MANUAL"
+        load_active_clients();
+    }
+}
+
+
+
 
 /* /POST/clear_gate/ */
 exports.clear_gate = async function(req, res){
