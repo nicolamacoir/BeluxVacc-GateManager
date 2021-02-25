@@ -256,8 +256,7 @@ async function load_active_clients() {
 }
 
 async function process_clients(clients) {
-	let i; const output_pilots = []; const
-		output_controllers = [];
+	let i; const output_pilots = []; const output_controllers = [];
 	if (DEBUG) {
 		console.log(`processing ${clients.pilots.length} pilots`);
 		console.time('process_clients');
@@ -502,12 +501,12 @@ setInterval(bookkeep_clients, 120 * 1000);
 
 /* /GET/all_gates */
 exports.list_all_gates = async function (req, res) {
-	const gates = null;
+	let gates = null;
 	if (req.params.airport) {
 		const airport = req.params.airport.toUpperCase();
-		const gates = await get_all_gates_for_airport(airport);
+		gates = await get_all_gates_for_airport(airport);
 	} else {
-		const gates = await get_all_gates();
+		gates = await get_all_gates();
 	}
 	res.json(gates);
 };
