@@ -1268,28 +1268,28 @@
 	},
 	{
 		"airport": "ELLX",
-		"gate": "A02",
+		"gate": "A2",
 		"apron": "apron-P1-A-nonshengen",
 		"latitude": 49.63435277777777,
 		"longitude": 6.218275
 	},
 	{
 		"airport": "ELLX",
-		"gate": "A04",
+		"gate": "A4",
 		"apron": "apron-P1-A-nonshengen",
 		"latitude": 49.63398333333334,
 		"longitude": 6.217783333333332
 	},
 	{
 		"airport": "ELLX",
-		"gate": "A06",
+		"gate": "A6",
 		"apron": "apron-P1-A",
 		"latitude": 49.6338,
 		"longitude": 6.217288888888889
 	},
 	{
 		"airport": "ELLX",
-		"gate": "A08",
+		"gate": "A8",
 		"apron": "apron-P1-A",
 		"latitude": 49.63361666666667,
 		"longitude": 6.2167972222222225
@@ -1317,63 +1317,63 @@
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B01",
+		"gate": "B1",
 		"apron": "apron-P1-B",
 		"latitude": 49.63266111111112,
 		"longitude": 6.213075
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B02",
+		"gate": "B2",
 		"apron": "apron-P1-B",
 		"latitude": 49.632761111111115,
 		"longitude": 6.2138583333333335
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B03",
+		"gate": "B3",
 		"apron": "apron-P1-B",
 		"latitude": 49.632394444444444,
 		"longitude": 6.213308333333335
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B04",
+		"gate": "B4",
 		"apron": "apron-P1-B",
 		"latitude": 49.63248055555555,
 		"longitude": 6.214105555555555
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B05",
+		"gate": "B5",
 		"apron": "apron-P1-B",
 		"latitude": 49.63213055555555,
 		"longitude": 6.213541666666667
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B06",
+		"gate": "B6",
 		"apron": "apron-P1-B",
 		"latitude": 49.63216388888888,
 		"longitude": 6.21433888888889
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B07",
+		"gate": "B7",
 		"apron": "apron-P1-B",
 		"latitude": 49.631863888888894,
 		"longitude": 6.213774999999999
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B08",
+		"gate": "B8",
 		"apron": "apron-P1-B",
 		"latitude": 49.631841666666666,
 		"longitude": 6.214619444444444
 	},
 	{
 		"airport": "ELLX",
-		"gate": "B09",
+		"gate": "B9",
 		"apron": "apron-P1-B",
 		"latitude": 49.631600000000006,
 		"longitude": 6.214008333333334
