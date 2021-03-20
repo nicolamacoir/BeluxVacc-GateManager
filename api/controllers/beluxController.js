@@ -12,7 +12,7 @@ const monitored_clients = {};
 let last_updated = Date.now();
 
 const belux_positions = ['EBBU', 'EBBR', 'EBOS', 'EBAW', 'EBCI', 'EBLG', 'ELLX'];
-const airports_of_interest = ['EBBR', 'ELLX'];
+const airports_of_interest = ['EBBR', 'ELLX', 'EBCI'];
 const location_coordinates = {
 	EBBR: { latitude: 50.902, longitude: 4.485 },
 	EBCI: { latitude: 50.4647, longitude: 4.4611 },
@@ -21,9 +21,9 @@ const location_coordinates = {
 const relevant_controllers = {
 	EBBR: ['EBBR_DEL', 'EBBR_GND', 'EBBR_N_GND', 'EBBR_TWR', 'EBBR_N_TWR', 'EBBR_APP', 'EBBR_F_APP', 'EBBR_DEP', 'EBBU_E_CTR', 'EBBU_CTR', 'EBBU_W_CTR'],
 	ELLX: ['ELLX_TWR', 'ELLX_APP', 'ELLX_F_APP', 'EBBU_E_CTR', 'EBBU_CTR', 'EBBU_W_CTR'],
+	EBCI: ["EBCI_GND", "EBCI_TWR", "EBCI_APP", "EBBR_DEP", "EBBR_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
 	/* "EBAW" : ["EBAW_GND", "EBAW_TWR", "EBBR_DEP", "EBBR_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
 	  "EBOS" : ["EBOS_GND", "EBOS_TWR", "EBOS_APP",, "EBBU_CTR", "EBBU_W_CTR"],
-	  "EBCI" : ["EBCI_GND", "EBCI_TWR", "EBCI_APP", "EBBR_DEP", "EBBR_APP", "EBBR_S_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
 	  "EBLG" : ["EBLG_GND", "EBLG_TWR", "EBLG_APP", "EBBU_CTR", "EBBU_E_CTR"] */
 };
 
@@ -698,7 +698,7 @@ exports.get_available_airports = function (req, res) {
 		},
 		{
 			icao: 'EBCI',
-			active: false,
+			active: true,
 		},
 		{
 			icao: 'EBOS',
