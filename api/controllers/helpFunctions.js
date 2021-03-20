@@ -10,8 +10,11 @@ const airport_zones = {
 	EBBR: [50.915, 50.886, 4.524, 4.45, 200],
 	EBBR_GA: [50.897989, 50.897117, 4.467701, 4.465336, 200],
 	ELLX: [49.6386, 49.6177, 6.237, 6.1868, 1400],
-	EBCI: [50.4659, 50.4539, 4.4822, 4.4355, 250]
-};
+	EBCI: [50.4659, 50.4539, 4.4822, 4.4355, 250],
+	EBLG: [50.6490, 50.6260, 5.4245, 5.4673, 1500],
+	EBAW: [51.1977, 51.1802, 4.4527, 4.4684, 200],
+	EBOS: [51.2054, 51.1946, 2.8536, 2.8980, 200]
+}
 
 function get_aircraft_info(actype) {
 	if (actype in aircraft_data) { return aircraft_data[actype]; }
@@ -223,6 +226,34 @@ function get_valid_aprons(airport, callsign, origin, actype, cargo = false) {
 		}
 
 		return [['apron-P10'], ['apron-P5']];
+
+	case 'EBLG':
+		if (cargo || detect_cargo(callsign)) {
+			if(detect_heavy(actype)){
+				return [['apron-north',], ['apron-P2']];
+			}else{
+				return [['apron-P2',], ['apron-north']];
+			}
+		}
+		return [['apron-P3',], ['apron-north']];
+
+	case 'EBAW':
+		if (detect_GA(actype)) {
+			return [['apron-GA'], ['apron-2']];
+		}
+		if (detect_private_jet(actype)) {
+			return [['apron-2'], ['apron-1']];
+		}
+		return [['apron-1',], ['apron-2']];
+
+	case 'EBOS':
+		if (detect_GA(actype)) {
+			return [['apron-3'], ['apron-3']];
+		}
+		if (cargo || detect_cargo(callsign)) {
+			return [['apron-2-cargo'], ['apron-2-cargo-overflow', 'apron-1']];
+		}
+		return [['apron-2',], ['apron-2-overflow']];
 
 	default:
 		return [null, null];

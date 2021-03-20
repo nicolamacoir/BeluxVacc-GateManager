@@ -12,19 +12,23 @@ const monitored_clients = {};
 let last_updated = Date.now();
 
 const belux_positions = ['EBBU', 'EBBR', 'EBOS', 'EBAW', 'EBCI', 'EBLG', 'ELLX'];
-const airports_of_interest = ['EBBR', 'ELLX', 'EBCI'];
+const airports_of_interest = ['EBBR', 'ELLX', 'EBCI', 'EBLG', 'EBAW', 'EBOS'];
 const location_coordinates = {
 	EBBR: { latitude: 50.902, longitude: 4.485 },
 	EBCI: { latitude: 50.4647, longitude: 4.4611 },
 	ELLX: { latitude: 49.6313, longitude: 6.2157 },
+	EBLG: { latitude: 50.6391, longitude: 5.4461 }, 
+	EBAW: { latitude: 51.1894, longitude: 4.4613 },
+	EBOS: { latitude: 51.2004, longitude: 2.8722 },
 };
+
 const relevant_controllers = {
 	EBBR: ['EBBR_DEL', 'EBBR_GND', 'EBBR_N_GND', 'EBBR_TWR', 'EBBR_N_TWR', 'EBBR_APP', 'EBBR_F_APP', 'EBBR_DEP', 'EBBU_E_CTR', 'EBBU_CTR', 'EBBU_W_CTR'],
 	ELLX: ['ELLX_TWR', 'ELLX_APP', 'ELLX_F_APP', 'EBBU_E_CTR', 'EBBU_CTR', 'EBBU_W_CTR'],
 	EBCI: ["EBCI_GND", "EBCI_TWR", "EBCI_APP", "EBBR_DEP", "EBBR_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
-	/* "EBAW" : ["EBAW_GND", "EBAW_TWR", "EBBR_DEP", "EBBR_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
-	  "EBOS" : ["EBOS_GND", "EBOS_TWR", "EBOS_APP",, "EBBU_CTR", "EBBU_W_CTR"],
-	  "EBLG" : ["EBLG_GND", "EBLG_TWR", "EBLG_APP", "EBBU_CTR", "EBBU_E_CTR"] */
+	EBLG: ["EBLG_GND", "EBLG_TWR", "EBLG_APP", "EBBU_CTR", "EBBU_E_CTR", "EBBU_W_CTR"],
+	EBAW: ["EBAW_GND", "EBAW_TWR", "EBBR_DEP", "EBBR_APP", "EBBU_E_CTR", "EBBU_CTR", "EBBU_W_CTR"],
+	EBOS: ["EBOS_GND", "EBOS_TWR", "EBOS_APP", "EBBU_CTR", "EBBU_E_CTR", "EBBU_W_CTR"],
 };
 
 // INJECT DATA IN DATABASE
@@ -432,7 +436,7 @@ async function process_clients(clients) {
 			if (arr_distance < 150) {
 				cur_gate = await get_gate_for_callsign(callsign);
 				if (cur_gate === null) {
-					const aprons = f.get_valid_aprons(client.flight_plan.arrival, callsign, client.flight_plan.departure, AC_code, client.flight_plan.remarks.toUpperCase().includes('CARGO'));
+					const aprons = f.get_valid_aprons(client.flight_plan.arrival, callsign, client.flight_plan.departure, AC_code, (client.flight_plan.remarks.toUpperCase().includes('CARGO') && !callsign.startsWith("LGL")));
 					cur_gate = await request_gate_on_apron(client.flight_plan.arrival, callsign, AC_code, aprons);
 
 					if (!cur_gate.success && DEBUG) console.log(cur_gate);
@@ -702,15 +706,15 @@ exports.get_available_airports = function (req, res) {
 		},
 		{
 			icao: 'EBOS',
-			active: false,
+			active: true,
 		},
 		{
 			icao: 'EBAW',
-			active: false,
+			active: true,
 		},
 		{
 			icao: 'EBLG',
-			active: false,
+			active: true,
 		},
 	]);
 };
