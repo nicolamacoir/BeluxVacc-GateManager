@@ -5,10 +5,12 @@ const data = JSON.parse(fs.readFileSync('api/data/data.json', 'utf8'));
 const aircraft_data = JSON.parse(fs.readFileSync('api/data/aircrafts.json', 'utf8'));
 const airport_data = JSON.parse(fs.readFileSync('api/data/airports.json', 'utf8'));
 
+// borders of the airports to check if aircraft is on ground
 const airport_zones = {
 	EBBR: [50.915, 50.886, 4.524, 4.45, 200],
 	EBBR_GA: [50.897989, 50.897117, 4.467701, 4.465336, 200],
 	ELLX: [49.6386, 49.6177, 6.237, 6.1868, 1400],
+	EBCI: [50.4659, 50.4539, 4.4822, 4.4355, 250]
 };
 
 function get_aircraft_info(actype) {
@@ -202,6 +204,25 @@ function get_valid_aprons(airport, callsign, origin, actype, cargo = false) {
 		}
 
 		return [['apron-P1-A'], ['apron-P1-V']];
+
+	case 'EBCI':
+		if (detect_GA(actype)) {
+			return [['apron-P1', 'apron-P3', 'apron-P4'], ['apron-P2']];
+		}
+
+		if (cargo || detect_cargo(callsign)) {
+			return [['apron-P5',], ['apron-P10-heavy']];
+		}
+
+		if (detect_heavy(actype)) {
+			return [['apron-P10-heavy'], ['apron-P5']];
+		}
+
+		if (detect_private_jet(actype)) {
+			return [['apron-P5'], ['apron-P10']];
+		}
+
+		return [['apron-P10'], ['apron-P5']];
 
 	default:
 		return [null, null];

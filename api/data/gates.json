@@ -1823,42 +1823,441 @@
 		"airport": "ELLX",
 		"gate": "GA01",
 		"apron": "apron-P5",
-		"latitude": 49.6249438664435,
-		"longitude": 6.19942658077069
+		"latitude": 49.62494387,
+		"longitude": 6.199426581
 	},
 	{
 		"airport": "ELLX",
 		"gate": "GA02",
 		"apron": "apron-P5",
-		"latitude": 49.6246797506036,
-		"longitude": 6.19891159393647
+		"latitude": 49.62467975,
+		"longitude": 6.198911594
 	},
 	{
 		"airport": "ELLX",
 		"gate": "GA03",
 		"apron": "apron-P5",
-		"latitude": 49.6244186103584,
-		"longitude": 6.19811434861121
+		"latitude": 49.62441861,
+		"longitude": 6.198114349
 	},
 	{
 		"airport": "ELLX",
 		"gate": "GA04",
 		"apron": "apron-P5",
-		"latitude": 49.6240571763725,
-		"longitude": 6.19728823969878
+		"latitude": 49.62405718,
+		"longitude": 6.19728824
 	},
 	{
 		"airport": "ELLX",
 		"gate": "MNT1",
 		"apron": "apron-P8",
-		"latitude": 49.6174113838335,
-		"longitude": 6.19982078630521
+		"latitude": 49.61741138,
+		"longitude": 6.199820786
 	},
 	{
 		"airport": "ELLX",
 		"gate": "MNT2",
 		"apron": "apron-P8",
-		"latitude": 49.6177936922197,
-		"longitude": 6.20099022935496
+		"latitude": 49.61779369,
+		"longitude": 6.200990229
+	},
+	{
+		"airport": "EBCI",
+		"gate": "1A",
+		"apron": "apron-P1",
+		"latitude": 50.45824722222223,
+		"longitude": 4.453166666666667
+	},
+	{
+		"airport": "EBCI",
+		"gate": "1B",
+		"apron": "apron-P1",
+		"latitude": 50.458272222222234,
+		"longitude": 4.453252777777777
+	},
+	{
+		"airport": "EBCI",
+		"gate": "2A",
+		"apron": "apron-P1",
+		"latitude": 50.45843611111111,
+		"longitude": 4.4538166666666665
+	},
+	{
+		"airport": "EBCI",
+		"gate": "2B",
+		"apron": "apron-P1",
+		"latitude": 50.45846111111112,
+		"longitude": 4.453902777777778
+	},
+	{
+		"airport": "EBCI",
+		"gate": "3A",
+		"apron": "apron-P1",
+		"latitude": 50.45861388888889,
+		"longitude": 4.454433333333333
+	},
+	{
+		"airport": "EBCI",
+		"gate": "3B",
+		"apron": "apron-P1",
+		"latitude": 50.458638888888885,
+		"longitude": 4.454519444444443
+	},
+	{
+		"airport": "EBCI",
+		"gate": "4A",
+		"apron": "apron-P1",
+		"latitude": 50.45879444444444,
+		"longitude": 4.4550777777777775
+	},
+	{
+		"airport": "EBCI",
+		"gate": "4B",
+		"apron": "apron-P1",
+		"latitude": 50.458819444444444,
+		"longitude": 4.455166666666666
+	},
+	{
+		"airport": "EBCI",
+		"gate": "17B",
+		"apron": "apron-P3",
+		"latitude": 50.45953611111112,
+		"longitude": 4.457838888888889
+	},
+	{
+		"airport": "EBCI",
+		"gate": "17C",
+		"apron": "apron-P3",
+		"latitude": 50.459716666666665,
+		"longitude": 4.458466666666668
+	},
+	{
+		"airport": "EBCI",
+		"gate": "18B",
+		"apron": "apron-P3",
+		"latitude": 50.459316666666666,
+		"longitude": 4.45798888888889
+	},
+	{
+		"airport": "EBCI",
+		"gate": "18C",
+		"apron": "apron-P3",
+		"latitude": 50.459500000000006,
+		"longitude": 4.4586194444444445
+	},
+	{
+		"airport": "EBCI",
+		"gate": "19",
+		"apron": "apron-P4",
+		"latitude": 50.45973333333333,
+		"longitude": 4.459233333333333
+	},
+	{
+		"airport": "EBCI",
+		"gate": "20",
+		"apron": "apron-P4",
+		"latitude": 50.45961111111111,
+		"longitude": 4.4593194444444455
+	},
+	{
+		"airport": "EBCI",
+		"gate": "21",
+		"apron": "apron-P4",
+		"latitude": 50.459488888888885,
+		"longitude": 4.459408333333334
+	},
+	{
+		"airport": "EBCI",
+		"gate": "22",
+		"apron": "apron-P4",
+		"latitude": 50.459855555555556,
+		"longitude": 4.459647222222223
+	},
+	{
+		"airport": "EBCI",
+		"gate": "23",
+		"apron": "apron-P4",
+		"latitude": 50.459730555555566,
+		"longitude": 4.459730555555556
+	},
+	{
+		"airport": "EBCI",
+		"gate": "24",
+		"apron": "apron-P4",
+		"latitude": 50.45960833333334,
+		"longitude": 4.459819444444444
+	},
+	{
+		"airport": "EBCI",
+		"gate": "25",
+		"apron": "apron-P4",
+		"latitude": 50.45997499999999,
+		"longitude": 4.460055555555555
+	},
+	{
+		"airport": "EBCI",
+		"gate": "26",
+		"apron": "apron-P4",
+		"latitude": 50.45985000000001,
+		"longitude": 4.460141666666668
+	},
+	{
+		"airport": "EBCI",
+		"gate": "27",
+		"apron": "apron-P4",
+		"latitude": 50.459727777777786,
+		"longitude": 4.460227777777778
+	},
+	{
+		"airport": "EBCI",
+		"gate": "30",
+		"apron": "apron-P5",
+		"latitude": 50.46016111111112,
+		"longitude": 4.460708333333335
+	},
+	{
+		"airport": "EBCI",
+		"gate": "31",
+		"apron": "apron-P5",
+		"latitude": 50.46000555555556,
+		"longitude": 4.4617861111111115
+	},
+	{
+		"airport": "EBCI",
+		"gate": "32",
+		"apron": "apron-P5",
+		"latitude": 50.46015,
+		"longitude": 4.462283333333334
+	},
+	{
+		"airport": "EBCI",
+		"gate": "33",
+		"apron": "apron-P5",
+		"latitude": 50.46029444444444,
+		"longitude": 4.462780555555557
+	},
+	{
+		"airport": "EBCI",
+		"gate": "34",
+		"apron": "apron-P5",
+		"latitude": 50.460438888888895,
+		"longitude": 4.463275
+	},
+	{
+		"airport": "EBCI",
+		"gate": "36",
+		"apron": "apron-P5",
+		"latitude": 50.46071111111112,
+		"longitude": 4.464308333333334
+	},
+	{
+		"airport": "EBCI",
+		"gate": "37",
+		"apron": "apron-P5",
+		"latitude": 50.46084444444444,
+		"longitude": 4.464763888888889
+	},
+	{
+		"airport": "EBCI",
+		"gate": "38",
+		"apron": "apron-P5",
+		"latitude": 50.4610138888889,
+		"longitude": 4.465347222222222
+	},
+	{
+		"airport": "EBCI",
+		"gate": "39",
+		"apron": "apron-P5",
+		"latitude": 50.46122777777778,
+		"longitude": 4.466083333333334
+	},
+	{
+		"airport": "EBCI",
+		"gate": "51",
+		"apron": "apron-P10",
+		"latitude": 50.46680555555556,
+		"longitude": 4.464013888888888
+	},
+	{
+		"airport": "EBCI",
+		"gate": "51B",
+		"apron": "apron-P10-heavy",
+		"latitude": 50.466852777777774,
+		"longitude": 4.464011111111112
+	},
+	{
+		"airport": "EBCI",
+		"gate": "52",
+		"apron": "apron-P10",
+		"latitude": 50.46696944444445,
+		"longitude": 4.464572222222222
+	},
+	{
+		"airport": "EBCI",
+		"gate": "53",
+		"apron": "apron-P10",
+		"latitude": 50.467130555555556,
+		"longitude": 4.4651305555555565
+	},
+	{
+		"airport": "EBCI",
+		"gate": "54",
+		"apron": "apron-P10",
+		"latitude": 50.467302777777775,
+		"longitude": 4.465722222222222
+	},
+	{
+		"airport": "EBCI",
+		"gate": "55",
+		"apron": "apron-P10",
+		"latitude": 50.46746388888889,
+		"longitude": 4.466280555555556
+	},
+	{
+		"airport": "EBCI",
+		"gate": "55B",
+		"apron": "apron-P10-heavy",
+		"latitude": 50.46746944444445,
+		"longitude": 4.466133333333334
+	},
+	{
+		"airport": "EBCI",
+		"gate": "56",
+		"apron": "apron-P10",
+		"latitude": 50.46765,
+		"longitude": 4.466747222222223
+	},
+	{
+		"airport": "EBCI",
+		"gate": "57",
+		"apron": "apron-P10",
+		"latitude": 50.467847222222225,
+		"longitude": 4.467391666666667
+	},
+	{
+		"airport": "EBCI",
+		"gate": "57B",
+		"apron": "apron-P10-heavy",
+		"latitude": 50.467800000000004,
+		"longitude": 4.467266666666668
+	},
+	{
+		"airport": "EBCI",
+		"gate": "58",
+		"apron": "apron-P10",
+		"latitude": 50.46804722222222,
+		"longitude": 4.468075
+	},
+	{
+		"airport": "EBCI",
+		"gate": "59",
+		"apron": "apron-P10",
+		"latitude": 50.46820833333333,
+		"longitude": 4.468633333333334
+	},
+	{
+		"airport": "EBCI",
+		"gate": "60",
+		"apron": "apron-P10",
+		"latitude": 50.46836944444445,
+		"longitude": 4.4691888888888895
+	},
+	{
+		"airport": "EBCI",
+		"gate": "61",
+		"apron": "apron-P10",
+		"latitude": 50.46853055555556,
+		"longitude": 4.469747222222221
+	},
+	{
+		"airport": "EBCI",
+		"gate": "62",
+		"apron": "apron-P10",
+		"latitude": 50.468691666666665,
+		"longitude": 4.470302777777777
+	},
+	{
+		"airport": "EBCI",
+		"gate": "63",
+		"apron": "apron-P10",
+		"latitude": 50.46885555555556,
+		"longitude": 4.470861111111111
+	},
+	{
+		"airport": "EBCI",
+		"gate": "64",
+		"apron": "apron-P10",
+		"latitude": 50.46905277777779,
+		"longitude": 4.471547222222222
+	},
+	{
+		"airport": "EBCI",
+		"gate": "65",
+		"apron": "apron-P10",
+		"latitude": 50.46921388888889,
+		"longitude": 4.472102777777778
+	},
+	{
+		"airport": "EBCI",
+		"gate": "93",
+		"apron": "apron-P10",
+		"latitude": 50.46795833333334,
+		"longitude": 4.471497222222222
+	},
+	{
+		"airport": "EBCI",
+		"gate": "66",
+		"apron": "apron-P10",
+		"latitude": 50.469413888888894,
+		"longitude": 4.472788888888889
+	},
+	{
+		"airport": "EBCI",
+		"gate": "67",
+		"apron": "apron-P10",
+		"latitude": 50.46959444444444,
+		"longitude": 4.473444444444445
+	},
+	{
+		"airport": "EBCI",
+		"gate": "67B",
+		"apron": "apron-P10-heavy",
+		"latitude": 50.46958055555555,
+		"longitude": 4.47336388888889
+	},
+	{
+		"airport": "EBCI",
+		"gate": "68",
+		"apron": "apron-P10",
+		"latitude": 50.46969444444445,
+		"longitude": 4.4739611111111115
+	},
+	{
+		"airport": "EBCI",
+		"gate": "69",
+		"apron": "apron-P10",
+		"latitude": 50.469855555555554,
+		"longitude": 4.474519444444444
+	},
+	{
+		"airport": "EBCI",
+		"gate": "70",
+		"apron": "apron-P10",
+		"latitude": 50.470016666666666,
+		"longitude": 4.475077777777778
+	},
+	{
+		"airport": "EBCI",
+		"gate": "71",
+		"apron": "apron-P10",
+		"latitude": 50.47023333333334,
+		"longitude": 4.47561111111111
+	},
+	{
+		"airport": "EBCI",
+		"gate": "72",
+		"apron": "apron-P10",
+		"latitude": 50.470394444444445,
+		"longitude": 4.476169444444444
 	}
 ]
