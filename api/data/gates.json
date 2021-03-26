@@ -2627,42 +2627,42 @@
 	{
 		"airport": "EBLG",
 		"gate": "130",
-		"apron": "apron-north",
+		"apron": "apron-north-new",
 		"latitude": 50.63875277777778,
 		"longitude": 5.434416666666667
 	},
 	{
 		"airport": "EBLG",
 		"gate": "132",
-		"apron": "apron-north",
+		"apron": "apron-north-new",
 		"latitude": 50.63930833333333,
 		"longitude": 5.435300000000001
 	},
 	{
 		"airport": "EBLG",
 		"gate": "134",
-		"apron": "apron-north",
+		"apron": "apron-north-new",
 		"latitude": 50.63986666666667,
 		"longitude": 5.436183333333334
 	},
 	{
 		"airport": "EBLG",
 		"gate": "136",
-		"apron": "apron-north",
+		"apron": "apron-north-new",
 		"latitude": 50.64042222222223,
 		"longitude": 5.437066666666667
 	},
 	{
 		"airport": "EBLG",
 		"gate": "138",
-		"apron": "apron-north",
+		"apron": "apron-north-new",
 		"latitude": 50.640972222222224,
 		"longitude": 5.437947222222222
 	},
 	{
 		"airport": "EBLG",
 		"gate": "140",
-		"apron": "apron-north",
+		"apron": "apron-north-new",
 		"latitude": 50.641536111111115,
 		"longitude": 5.438836111111111
 	},

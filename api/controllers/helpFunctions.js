@@ -120,6 +120,13 @@ function detect_private_jet(actype) {
 	return false;
 }
 
+function detect_regional_jet(actype) {
+	if (binarySearch(data.ac_regionaljets, actype)) {
+		return true;
+	}
+	return false;
+}
+
 function detect_heavy(actype) {
 	if (binarySearch(data.ac_heavy, actype)) {
 		return true;
@@ -191,7 +198,7 @@ function get_valid_aprons(airport, callsign, origin, actype, cargo = false) {
 			return [['apron-P1-V-heavy'], ['apron-P7-Z', 'apron-P10-Z']];
 		}
 
-		if (detect_turboprop(actype)) {
+		if (detect_turboprop(actype) || detect_regional_jet(actype)) {
 			if (detect_shengen(origin)) {
 				return [['apron-P1-B'], ['apron-P1-V']];
 			}
