@@ -164,14 +164,17 @@ function detect_lowcost(callsign) {
 function get_valid_aprons(airport, callsign, origin, actype, cargo = false) {
 	switch (airport) {
 	case 'EBBR':
-		if (detect_GA(actype) || detect_private_jet(actype)) {
-			return [['apron-GA'], ['apron-60']];
+		if (detect_GA(actype)) {
+			return [['apron-GA'], ['apron-51c']];
+		}
+		if (detect_private_jet(actype)) {
+			return [['apron-51c'], ['apron-GA']];
 		}
 		if (detect_MIL(actype, callsign)) {
 			return [['apron-MIL'], ['apron-60']];
 		}
 		if (cargo || detect_cargo(callsign)) {
-			return [['apron-9'], ['apron-51c']];
+			return [['apron-9'], ['apron-60']];
 		}
 		if (detect_shengen(origin)) {
 			if (detect_lowcost(callsign)) {
