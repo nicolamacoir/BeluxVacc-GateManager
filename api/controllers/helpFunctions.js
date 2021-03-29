@@ -240,12 +240,12 @@ function get_valid_aprons(airport, callsign, origin, actype, cargo = false) {
 	case 'EBLG':
 		if (cargo || detect_cargo(callsign)) {
 			if(detect_heavy(actype)){
-				return [['apron-north',], ['apron-P2']];
+				return [['apron-north',], ['apron-P2', 'apron-P3']];
 			}else{
-				return [['apron-P2',], ['apron-north']];
+				return [['apron-P2', 'apron-P3'], ['apron-north']];
 			}
 		}
-		return [['apron-P3',], ['apron-north']];
+		return [['apron-P1'], ['apron-P3']];
 
 	case 'EBAW':
 		if (detect_GA(actype)) {
@@ -254,7 +254,7 @@ function get_valid_aprons(airport, callsign, origin, actype, cargo = false) {
 		if (detect_private_jet(actype)) {
 			return [['apron-2'], ['apron-1']];
 		}
-		return [['apron-1',], ['apron-2']];
+		return [['apron-1'], ['apron-2']];
 
 	case 'EBOS':
 		if (detect_GA(actype)) {
@@ -263,7 +263,7 @@ function get_valid_aprons(airport, callsign, origin, actype, cargo = false) {
 		if (cargo || detect_cargo(callsign)) {
 			return [['apron-2-cargo'], ['apron-2-cargo-overflow', 'apron-1']];
 		}
-		return [['apron-2',], ['apron-2-overflow']];
+		return [['apron-2'], ['apron-2-overflow']];
 
 	default:
 		return [null, null];
