@@ -39,7 +39,7 @@ module.exports = function (app) {
 		.get(belux.get_available_airports);
 
 	app.route('/version/plugin')
-		.get((req, res) => { res.send('1.0.0'); });
+		.get((req, res) => { res.send('1.1.0'); });
 
 	app.route('/version/API')
 		.get((req, res) => { res.send(process.env.npm_package_version); });
