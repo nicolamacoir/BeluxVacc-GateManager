@@ -8,5 +8,5 @@
   "cs_cargo": ["ABD", "ABR", "ABW", "AFX", "AHK", "AIC", "AZG", "BBD", "BCS", "BGA", "BOX", "CJT", "CKK", "CKS", "CLU", "CLX", "CTJ", "DAE", "DHK", "DHL", "DSR", "EIA", "EUF", "FDX", "FRH", "GEC", "GTI", "ICL", "ICV", "LAE", "LAP", "LCO", "LTG", "MAS", "MCA", "MPH", "MSX", "MZN", "NCA", "NPT", "NWA", "PAC", "QAC", "RCF", "SHQ", "SQC", "SWN", "TAY", "UPS", "WGN", "WLF", "XSC"],
   "cs_low_cost": ["EJU", "EZS", "EZY", "LDA", "LDM", "MAY", "RUK", "RYR", "RYS", "WZZ"],
   "cs_MIL": ["AAC", "AAF", "AIO", "AKG", "AME", "ASF", "ASY", "AYB", "BAF", "BYN", "CAP", "CFC", "CGX", "CHD", "CNV", "CWL", "DAF", "DAR", "DNY", "EEF", "FAF", "FAG", "FNF", "GAF", "GAM", "GNY", "HKY", "HRZ", "KIN", "KRF", "KRH", "LCS", "MJN", "NATO", "NOH", "NOW", "NVY", "PAT", "PLF", "PNY", "RCH", "RFF", "RFR", "RRF", "RRR", "TTF"],
-  "ap_shengen": ["BI", "EB", "ED", "EE", "EF", "EH", "EK", "EL", "EN", "EP", "ES", "EV", "EY", "LE", "LF", "LG", "LH", "LI", "LJ", "LK", "LM", "LO", "LP", "LS", "LZ"]
+  "ap_shengen": ["BI", "EB", "ED", "EE", "EF", "EH", "EK", "EL", "EN", "EP", "ES", "EV", "EY", "GC", "LE", "LF", "LG", "LH", "LI", "LJ", "LK", "LM", "LO", "LP", "LS", "LZ"]
 }
