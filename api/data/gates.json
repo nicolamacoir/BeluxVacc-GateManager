@@ -358,13 +358,6 @@
 	},
 	{
 		"airport": "EBBR",
-		"gate": "201",
-		"apron": "apron-2-south",
-		"latitude": 50.89889722222223,
-		"longitude": 4.4852694444444445
-	},
-	{
-		"airport": "EBBR",
 		"gate": "205R",
 		"apron": "apron-2-south",
 		"latitude": 50.899325000000005,
